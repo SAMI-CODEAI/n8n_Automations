@@ -1,0 +1,529 @@
+{
+  "name": "LeetCode KB - Optimized Historical Import",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fieldsToSend": {
+          "submit": "all"
+        },
+        "fieldsValues": {
+          "fields": [
+            {
+              "name": "GITHUB_USERNAME",
+              "value": "SAMI-CODEAI"
+            },
+            {
+              "name": "GITHUB_REPO",
+              "value": "LeetCode_Practice"
+            },
+            {
+              "name": "NOTION_DATABASE_ID",
+              "value": "996aa5fe4cc84859b910e2191adcc6cf"
+            },
+            {
+              "name": "NOTION_PARENT_PAGE_ID",
+              "value": "e62b2b4b3d9749168d50705d2193a11e"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "edit-fields",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        280,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.github.com/repos/{{ $('Edit Fields').first().json.GITHUB_USERNAME }}/{{ $('Edit Fields').first().json.GITHUB_REPO }}/git/trees/main?recursive=1",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": false
+            }
+          }
+        }
+      },
+      "id": "github-list-files",
+      "name": "GitHub - List All Files",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        500,
+        200
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "LlMVFCavOMtzIaub",
+          "name": "GitHub Token Header"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": "={{ $('Edit Fields').first().json.NOTION_DATABASE_ID }}",
+        "returnAll": true,
+        "simple": true,
+        "options": {}
+      },
+      "id": "notion-fetch-all",
+      "name": "Notion - Fetch All Pages",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        500,
+        400
+      ],
+      "credentials": {
+        "notionApi": {
+          "id": "22Dy3eiEddCpmoBH",
+          "name": "Notion API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Parse existing Notion pages (if any are returned)\nlet existingPages = [];\ntry {\n  existingPages = $('Notion - Fetch All Pages').all().map(item => {\n    const props = item.json;\n    return {\n      problemNumber: (props['Problem Number'] || '').toString().trim().padStart(4, '0'),\n      language: (props['Language'] || '').toString().trim()\n    };\n  });\n} catch (e) {\n  existingPages = [];\n}\n\n// Create an optimization set for instant lookup: \"problemNumber_Language\"\nconst existingSet = new Set(existingPages.map(p => `${p.problemNumber}_${p.language}`));\n\n// 2. Filter solution files from GitHub Tree\nconst tree = $('GitHub - List All Files').first().json.tree;\nconst solutionFiles = tree.filter(item => {\n  if (item.type !== 'blob') return false;\n  const path = item.path;\n  const ext = ['.py', '.java', '.cpp', '.js', '.ts', '.go', '.rs', '.kt', '.cs', '.rb'];\n  return ext.some(e => path.endsWith(e)) && path.includes('/');\n});\n\n// 3. Extract metadata and filter out duplicates\nconst solutions = [];\nfor (const f of solutionFiles) {\n  const parts = f.path.split('/');\n  const folder = parts[0];\n  const filename = parts[parts.length - 1];\n  const ext = filename.split('.').pop();\n  \n  const langMap = {\n    py: 'Python', java: 'Java', cpp: 'C++', js: 'JavaScript',\n    ts: 'TypeScript', go: 'Go', rs: 'Rust', kt: 'Kotlin',\n    cs: 'C#', rb: 'Ruby'\n  };\n  \n  const match = folder.match(/^(\\d+)[^a-zA-Z]*(.*)/); \n  const problemNumber = match ? match[1].padStart(4, '0') : '0000';\n  const rawName = match ? match[2].replace(/-/g, ' ').trim() : folder;\n  const problemName = rawName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');\n  const language = langMap[ext] || ext.toUpperCase();\n\n  // Check lookup key\n  const lookupKey = `${problemNumber}_${language}`;\n  if (!existingSet.has(lookupKey)) {\n    solutions.push({\n      path: f.path,\n      sha: f.sha,\n      folder: folder,\n      filename: filename,\n      language: language,\n      extension: ext,\n      problemNumber: problemNumber,\n      problemName: problemName\n    });\n  }\n}\n\n// Temporarily slice to 1 item for a safe run-test\n// Change to return solutions.map(s => ({ json: s })); once verified!\nreturn solutions.slice(0, 1).map(s => ({ json: s }));"
+      },
+      "id": "filter-solutions",
+      "name": "Filter & Parse Solution Files",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        760,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.github.com/repos/{{ $('Edit Fields').first().json.GITHUB_USERNAME }}/{{ $('Edit Fields').first().json.GITHUB_REPO }}/contents/{{ encodeURIComponent($json.path) }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "id": "github-read-file",
+      "name": "GitHub - Read Solution Code",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        980,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "LlMVFCavOMtzIaub",
+          "name": "GitHub Token Header"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.item.json;\nconst encoded = item.content.replace(/\\n/g, '');\nconst decoded = Buffer.from(encoded, 'base64').toString('utf-8');\n\nconst prev = $('Filter & Parse Solution Files').item.json;\n\nreturn {\n  json: {\n    ...prev,\n    code: decoded,\n    githubUrl: item.html_url,\n    downloadUrl: item.download_url\n  }\n};"
+      },
+      "id": "decode-code",
+      "name": "Decode Base64 Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"model\": \"gpt-4o\",\n  \"response_format\": { \"type\": \"json_object\" },\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are an expert competitive programming instructor. Your job is to analyze LeetCode solutions and produce comprehensive educational notes in strict JSON format.\\n\\nAlways respond with ONLY valid JSON — no markdown, no backticks, no preamble.\\n\\nFor topic, choose exactly ONE from: Arrays, Strings, Linked List, Trees, Graphs, Dynamic Programming, Greedy, Binary Search, Sliding Window, Two Pointers, Stack, Queue, Heap, Trie, Backtracking, Math, Bit Manipulation, Hash Table, Sorting, Design\\n\\nFor difficulty, choose: Easy, Medium, or Hard\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": `Analyze this LeetCode solution and return JSON:\\n\\nProblem Number: {{ $json.problemNumber }}\\nProblem Name: {{ $json.problemName }}\\nLanguage: {{ $json.language }}\\n\\nCode:\\n\\`\\`\\`{{ $json.extension }}\\n{{ $json.code }}\\n\\`\\`\\`\\n\\nReturn this exact JSON structure (fill all fields, use arrays for list fields):\\n{\\n  \"problem_number\": \"\",\\n  \"problem_name\": \"\",\\n  \"difficulty\": \"\",\\n  \"language\": \"\",\\n  \"topic\": \"\",\\n  \"subtopic\": \"\",\\n  \"algorithm\": \"\",\\n  \"pattern\": \"\",\\n  \"intuition\": \"\",\\n  \"step_by_step_logic\": [],\\n  \"line_by_line_explanation\": [],\\n  \"dry_run\": \"\",\\n  \"time_complexity\": \"\",\\n  \"space_complexity\": \"\",\\n  \"alternative_solutions\": [],\\n  \"better_optimization\": \"\",\\n  \"common_mistakes\": [],\\n  \"revision_notes\": [],\\n  \"flashcards\": [],\\n  \"related_questions\": [],\\n  \"interview_tips\": \"\"\\n}`\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "ai-analysis",
+      "name": "AI - Analyze Solution (OpenAI)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1420,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "openai-header-auth",
+          "name": "OpenAI API Header"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse AI response and merge with file metadata\nconst aiResponse = $input.first().json;\nconst fileData = $('Decode Base64 Code').first().json;\n\nlet analysisText = '';\ntry {\n  analysisText = aiResponse.choices[0].message.content;\n  // Strip markdown code fences if present\n  analysisText = analysisText.replace(/```json\\n?/gi, '').replace(/```\\n?/gi, '').trim();\n} catch(e) {\n  throw new Error('Could not extract AI text: ' + e.message);\n}\n\nlet analysis;\ntry {\n  analysis = JSON.parse(analysisText);\n} catch(e) {\n  throw new Error('JSON parse failed: ' + e.message + '\\nRaw: ' + analysisText.substring(0, 500));\n}\n\n// Override with known metadata\nanalysis.problem_number = fileData.problemNumber;\nanalysis.problem_name = fileData.problemName;\nanalysis.language = fileData.language;\nanalysis.github_url = fileData.githubUrl;\nanalysis.leetcode_url = `https://leetcode.com/problems/${fileData.folder.replace(/^\\d+-/, '')}/`;\n\nreturn [{ json: analysis }];"
+      },
+      "id": "parse-ai-response",
+      "name": "Parse AI Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1640,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build NeetCode URL from problem name\nconst data = $input.first().json;\nconst slug = data.problem_name\n  .toLowerCase()\n  .replace(/[^a-z0-9\\s]/g, '')\n  .trim()\n  .replace(/\\s+/g, '-');\n\nconst neetcodeUrl = `https://neetcode.io/problems/${slug}`;\nconst youtubeSearchUrl = `https://www.youtube.com/results?search_query=neetcode+${encodeURIComponent(data.problem_name)}`;\n\nreturn [{ json: { ...data, neetcode_url: neetcodeUrl, youtube_search: youtubeSearchUrl } }];"
+      },
+      "id": "neetcode-lookup",
+      "name": "NeetCode - Build Video URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1860,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build NeetCode URL from problem name\nconst data = $input.first().json;\nconst slug = data.problem_name\n  .toLowerCase()\n  .replace(/[^a-z0-9\\s]/g, '')\n  .trim()\n  .replace(/\\s+/g, '-');\n\nconst neetcodeUrl = `https://neetcode.io/problems/${slug}`;\nconst youtubeSearchUrl = `https://www.youtube.com/results?search_query=neetcode+${encodeURIComponent(data.problem_name)}`;\n\nreturn [{ json: { ...data, neetcode_url: neetcodeUrl, youtube_search: youtubeSearchUrl } }];"
+      },
+      "id": "build-neetcode-url",
+      "name": "Build NeetCode URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2080,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "page",
+        "operation": "create",
+        "pageId": "={{ $('Edit Fields').first().json.NOTION_PARENT_PAGE_ID }}",
+        "title": "={{ $json.problem_number + ' - ' + $json.problem_name + ' (' + $json.language + ')' }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Problem Number",
+              "type": "rich_text",
+              "textValue": "={{ $json.problem_number }}"
+            },
+            {
+              "key": "Problem Name",
+              "type": "title",
+              "textValue": "={{ $json.problem_number + ' - ' + $json.problem_name }}"
+            },
+            {
+              "key": "Language",
+              "type": "select",
+              "selectValue": "={{ $json.language }}"
+            },
+            {
+              "key": "Topic",
+              "type": "select",
+              "selectValue": "={{ $json.topic }}"
+            },
+            {
+              "key": "Subtopic",
+              "type": "rich_text",
+              "textValue": "={{ $json.subtopic }}"
+            },
+            {
+              "key": "Difficulty",
+              "type": "select",
+              "selectValue": "={{ $json.difficulty }}"
+            },
+            {
+              "key": "Algorithm",
+              "type": "rich_text",
+              "textValue": "={{ $json.algorithm }}"
+            },
+            {
+              "key": "Pattern",
+              "type": "rich_text",
+              "textValue": "={{ $json.pattern }}"
+            },
+            {
+              "key": "Time Complexity",
+              "type": "rich_text",
+              "textValue": "={{ $json.time_complexity }}"
+            },
+            {
+              "key": "Space Complexity",
+              "type": "rich_text",
+              "textValue": "={{ $json.space_complexity }}"
+            },
+            {
+              "key": "GitHub URL",
+              "type": "url",
+              "urlValue": "={{ $json.github_url }}"
+            },
+            {
+              "key": "LeetCode URL",
+              "type": "url",
+              "urlValue": "={{ $json.leetcode_url }}"
+            },
+            {
+              "key": "NeetCode URL",
+              "type": "url",
+              "urlValue": "={{ $json.neetcode_url }}"
+            },
+            {
+              "key": "Solved Date",
+              "type": "date",
+              "dateValue": "={{ $now.toISO() }}"
+            }
+          ]
+        }
+      },
+      "id": "notion-create-page",
+      "name": "Notion - Create Problem Page",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        2300,
+        300
+      ],
+      "credentials": {
+        "notionApi": {
+          "id": "notion-api-cred",
+          "name": "Notion API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build Notion blocks for the page content\nconst d = $('Build NeetCode URL').first().json;\nconst pageId = $input.first().json.id;\n\nconst heading = (text, level = 2) => ({\n  object: 'block',\n  type: `heading_${level}`,\n  [`heading_${level}`]: {\n    rich_text: [{ type: 'text', text: { content: text } }]\n  }\n});\n\nconst paragraph = (text) => ({\n  object: 'block',\n  type: 'paragraph',\n  paragraph: {\n    rich_text: [{ type: 'text', text: { content: String(text || '') } }]\n  }\n});\n\nconst bullet = (text) => ({\n  object: 'block',\n  type: 'bulleted_list_item',\n  bulleted_list_item: {\n    rich_text: [{ type: 'text', text: { content: String(text || '') } }]\n  }\n});\n\nconst divider = () => ({ object: 'block', type: 'divider', divider: {} });\n\nconst codeBlock = (code, lang = 'plain text') => ({\n  object: 'block',\n  type: 'code',\n  code: {\n    language: lang.toLowerCase().replace('c++', 'c').replace('javascript', 'javascript').replace('typescript', 'typescript').replace('python', 'python').replace('java', 'java').replace('go', 'go').replace('rust', 'rust').replace('kotlin', 'kotlin'),\n    rich_text: [{ type: 'text', text: { content: String(code || '').substring(0, 2000) } }]\n  }\n});\n\nconst callout = (text, emoji = '💡') => ({\n  object: 'block',\n  type: 'callout',\n  callout: {\n    icon: { type: 'emoji', emoji },\n    rich_text: [{ type: 'text', text: { content: String(text || '') } }]\n  }\n});\n\nconst blocks = [\n  heading('📌 Problem Info', 2),\n  paragraph(`Difficulty: ${d.difficulty} | Language: ${d.language} | Topic: ${d.topic} | Subtopic: ${d.subtopic}`),\n  paragraph(`Algorithm: ${d.algorithm} | Pattern: ${d.pattern}`),\n  divider(),\n\n  heading('🧠 Intuition', 2),\n  callout(d.intuition, '🧠'),\n  divider(),\n\n  heading('🪜 Step-by-Step Logic', 2),\n  ...(Array.isArray(d.step_by_step_logic) ? d.step_by_step_logic.map((s, i) => bullet(`${i+1}. ${s}`)) : [paragraph(String(d.step_by_step_logic))]),\n  divider(),\n\n  heading('🔍 Line-by-Line Explanation', 2),\n  ...(Array.isArray(d.line_by_line_explanation) ? d.line_by_line_explanation.map(l => bullet(l)) : [paragraph(String(d.line_by_line_explanation))]),\n  divider(),\n\n  heading('🎯 Dry Run / Trace', 2),\n  codeBlock(d.dry_run, 'plain text'),\n  divider(),\n\n  heading('⏱️ Complexity Analysis', 2),\n  paragraph(`Time Complexity: ${d.time_complexity}`),\n  paragraph(`Space Complexity: ${d.space_complexity}`),\n  divider(),\n\n  heading('🔄 Alternative Approaches', 2),\n  ...(Array.isArray(d.alternative_solutions) ? d.alternative_solutions.map(a => bullet(a)) : [paragraph(String(d.alternative_solutions))]),\n  divider(),\n\n  heading('🚀 Optimization Notes', 2),\n  callout(d.better_optimization, '🚀'),\n  divider(),\n\n  heading('⚠️ Common Mistakes', 2),\n  ...(Array.isArray(d.common_mistakes) ? d.common_mistakes.map(m => bullet(m)) : [paragraph(String(d.common_mistakes))]),\n  divider(),\n\n  heading('🎤 Interview Tips', 2),\n  callout(d.interview_tips, '🎤'),\n  divider(),\n\n  heading('📝 Revision Notes', 2),\n  ...(Array.isArray(d.revision_notes) ? d.revision_notes.map(r => bullet(r)) : [paragraph(String(d.revision_notes))]),\n  divider(),\n\n  heading('🃏 Flashcards', 2),\n  ...(Array.isArray(d.flashcards) ? d.flashcards.map(f => {\n    const fc = typeof f === 'object' ? `Q: ${f.question || f.q || f} | A: ${f.answer || f.a || ''}` : String(f);\n    return callout(fc, '🃏');\n  }) : [paragraph(String(d.flashcards))]),\n  divider(),\n\n  heading('🔗 Related Problems', 2),\n  ...(Array.isArray(d.related_questions) ? d.related_questions.map(r => bullet(r)) : [paragraph(String(d.related_questions))]),\n  divider(),\n\n  heading('🔗 Links', 2),\n  paragraph(`GitHub: ${d.github_url}`),\n  paragraph(`LeetCode: ${d.leetcode_url}`),\n  paragraph(`NeetCode: ${d.neetcode_url}`),\n  paragraph(`YouTube Search: ${d.youtube_search}`)\n];\n\nreturn [{ json: { pageId, blocks } }];"
+      },
+      "id": "build-notion-blocks",
+      "name": "Build Notion Page Content",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2520,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.notion.com/v1/blocks/{{ $json.pageId }}/children",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify({ children: $json.blocks }) }}",
+        "options": {}
+      },
+      "id": "notion-append-blocks",
+      "name": "Notion - Append Content Blocks",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2740,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "notion-header-auth",
+          "name": "Notion API Header"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate results and build summary\nconst allItems = $input.all();\nconst processed = allItems.length;\n\nreturn [{\n  json: {\n    summary: {\n      total_processed: processed,\n      timestamp: new Date().toISOString(),\n      message: `Historical import complete. ${processed} problems imported into Notion.`\n    }\n  }\n}];"
+      },
+      "id": "import-summary",
+      "name": "Import Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2960,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "GitHub - List All Files",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notion - Fetch All Pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub - List All Files": {
+      "main": [
+        [
+          {
+            "node": "Filter & Parse Solution Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion - Fetch All Pages": {
+      "main": [
+        [
+          {
+            "node": "Filter & Parse Solution Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter & Parse Solution Files": {
+      "main": [
+        [
+          {
+            "node": "GitHub - Read Solution Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub - Read Solution Code": {
+      "main": [
+        [
+          {
+            "node": "Decode Base64 Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decode Base64 Code": {
+      "main": [
+        [
+          {
+            "node": "AI - Analyze Solution (OpenAI)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI - Analyze Solution (OpenAI)": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Response": {
+      "main": [
+        [
+          {
+            "node": "Build NeetCode URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build NeetCode URL": {
+      "main": [
+        [
+          {
+            "node": "Notion - Create Problem Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion - Create Problem Page": {
+      "main": [
+        [
+          {
+            "node": "Build Notion Page Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Notion Page Content": {
+      "main": [
+        [
+          {
+            "node": "Notion - Append Content Blocks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion - Append Content Blocks": {
+      "main": [
+        [
+          {
+            "node": "Import Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    "leetcode",
+    "notion",
+    "github",
+    "ai"
+  ],
+  "pinData": {}
+}
