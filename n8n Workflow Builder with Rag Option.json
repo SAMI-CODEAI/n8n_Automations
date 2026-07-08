@@ -1,0 +1,332 @@
+{
+  "name": "n8n Workflow Builder with Rag Option",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ba1e31b0-5fa6-4f5c-909e-274183429db6",
+      "name": "When chat message received",
+      "webhookId": "a55c1b4f-1dd4-40e7-9a99-a89902e2f5a9"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f4b8c16e-6788-4c17-b643-94a3f0620860",
+              "name": "Workflow Link",
+              "value": "=https://localhost:5678/workflow/{{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        688,
+        0
+      ],
+      "id": "6588911a-cfac-4a92-970a-e0f1d5b348ed",
+      "name": "Workflow Link"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "use this tool to for more Examples about n8n Workflows",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "yttest",
+          "mode": "list",
+          "cachedResultName": "yttest"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        368,
+        240
+      ],
+      "id": "8d6442e6-bcef-4ad0-9ef5-358dedcae022",
+      "name": "Pinecone Vector Store"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        304,
+        384
+      ],
+      "id": "51223b34-3311-4b38-876b-414853cbc2bd",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "65AVfbKHIeuliB2q",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "yttest",
+          "mode": "list",
+          "cachedResultName": "yttest"
+        },
+        "embeddingBatchSize": 1000,
+        "options": {
+          "pineconeNamespace": "workflows"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "4adef070-a789-44b1-8210-39ec666aa598",
+      "name": "Pinecone Vector Store1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1104,
+        224
+      ],
+      "id": "6830bb0e-d5ff-4400-88ca-05019d8a87b7",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "65AVfbKHIeuliB2q",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        1312,
+        208
+      ],
+      "id": "e41c65ff-8758-41bf-b1c9-ed3ba909294e",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1WYgHKdo23qnloss_6XQKrONvlG64Gia4",
+          "mode": "list",
+          "cachedResultName": "n8n RAG Training",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1WYgHKdo23qnloss_6XQKrONvlG64Gia4"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        944,
+        0
+      ],
+      "id": "18a4bbec-c9e4-4995-bb1b-b38ad0846c9f",
+      "name": "Google Drive Trigger"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are an expert AI workflow developer specializing in building workflows for n8n as JSON. Your job is to translate a human’s natural language request into a fully functional n8n workflow JSON. It should be comprehensive, functional, and importable. It should have 100% valid JSON structure, node types, and connection methods.\n\n## Output\nYour output should only be the final JSON of the full workflow.\n\nYour output must start with a { and must end with a }.\n- Do not include anything before the { (such as ```json or any markdown formatting).\n- Do not include anything after the } (such as closing code blocks like ``` or explanations).\n\nYour output should be a pure JSON object that begins with { and ends with }, ready to be used as the body of a POST request.\n\nThe JSON must:\n- Be syntactically valid and complete\n- Include a `nodes` array with each node containing all required parameters\n- Include a `connections` object that correctly maps outputs to inputs\n- Start with a `trigger` node if one is required for the use case (e.g., Webhook, Schedule, etc.)\n- Contain descriptive names and parameter values relevant to the user request\n- Avoid placeholders unless no reasonable value can be inferred\n- Contain sticky notes that are explaining what's going on within each step and any credentials or connections that still need to be configured. The colors should vary throughout the workflow.\n\nBefore generating the JSON, analyze the request and:\n1. Break it down into logical automation steps\n2. Choose appropriate nodes based on the steps\n3. Properly connect the nodes to reflect execution order\n\nIf the request is ambiguous, make a best guess using standard automation logic.\n\nDo not return explanations, comments, or any output outside of the JSON markdown block.\n\nYou are expected to produce developer-grade output suitable for direct import into n8n.\n\n## API Submission Requirements\nTo automatically create a workflow using the n8n API, your generated JSON must include the following top-level fields in the final object:\n\n- `name` (string): A clear, descriptive workflow name.\n- `nodes` (array): The complete array of node objects used in the workflow.\n- `connections` (object): A valid map of node-to-node connections.\n- `settings` (object): Workflow-level settings (e.g. `saveManualExecutions`, `executionOrder`).\n- `staticData` (null or object): Set to `null` unless specific static data is needed.\n\nExample “settings” object:\n  \"settings\": {\n    \"executionOrder\": \"v1\",\n    \"saveManualExecutions\": true,\n    \"saveDataSuccessExecution\": \"all\",\n    \"saveExecutionProgress\": true,\n    \"saveDataErrorExecution\": \"all\",\n    \"errorWorkflow\": \"\",\n    \"timezone\": \"America/New_York\"\n  }\n\n## n8n Documentation\nUse the Data from the user Prompt and surch the vectorstore for more Example."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "ffcb12c2-75eb-4759-bb3b-effdb661feb6",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "workflowObject": "={{ $json.output }}",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        528,
+        0
+      ],
+      "id": "8d3c2712-e5e4-4d3a-a5a1-7b668cab7c6e",
+      "name": "Create a workflow",
+      "credentials": {
+        "n8nApi": {
+          "id": "FzxX1ZDNaIcuBqfq",
+          "name": "n8n account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        128,
+        224
+      ],
+      "id": "b9434136-c722-407c-bfda-7cfb1eb0b90b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "65AVfbKHIeuliB2q",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Create a workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a workflow": {
+      "main": [
+        [
+          {
+            "node": "Workflow Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "2ae6a814-ceb2-4787-93b2-326ef6e09a99",
+  "meta": {
+    "instanceId": "8e2b3d13ae6fa6559fbcb82596263a9a3c863b26c25db9e2d4c29a96e06d8c68"
+  },
+  "nodeGroups": [],
+  "id": "bghWbkTZHk5PGM9w",
+  "tags": []
+}
