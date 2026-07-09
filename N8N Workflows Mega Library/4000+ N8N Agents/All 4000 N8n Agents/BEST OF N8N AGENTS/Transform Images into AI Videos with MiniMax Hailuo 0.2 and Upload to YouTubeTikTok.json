@@ -1,0 +1,834 @@
+{
+  "name": "Image-to-Video with MiniMax Hailuo 02 and upload on Youtube and TikTok",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "c51fb38e-fc2a-4cc2-a610-5e14c031c8aa",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        2432,
+        3968
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/minimax/requests/{{ $('Create video').item.json.request_id }}/status ",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "74c8e2c4-6592-433f-ad0b-8a2fb3c87a19",
+      "name": "Get status",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3504,
+        3968
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "content": "## Image\n![image](https://n3wstorage.b-cdn.net/n3witalia/girl-beach.jpeg)",
+        "height": 360,
+        "width": 540,
+        "color": 6
+      },
+      "id": "2b61664e-c32a-49b9-b9d2-8ad82f99400c",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2432,
+        2352
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Prompt\nThe girl is windsurfing with her dog\n\n## Result\nhttps://n3wstorage.b-cdn.net/n3witalia/girl-beach.mp4",
+        "height": 180,
+        "width": 540,
+        "color": 4
+      },
+      "id": "58aabbfc-7ea4-4d97-b067-b053a4aed62a",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2432,
+        2752
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "amount": 60
+      },
+      "id": "c0ecda4b-b3b7-4d9f-9ab6-71e3fcce5c70",
+      "name": "Wait 60 sec.",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        3312,
+        3968
+      ],
+      "webhookId": "351bd496-a9cc-445c-86f6-a56189df0028",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "id": "5c15ca00-4739-4c7f-a2a3-6db57e29fa6f",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        2432,
+        3824
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "content": "# Image to Video with MiniMax Hailuo 02\n\nThis automated workflow takes a static image and a textual prompt and transforms them into an animated video using the **MiniMax Hailuo 02** model. It then uploads the generated video to **YouTube and TikTok**, and updates a Google Sheet with relevant links and metadata.",
+        "height": 240,
+        "width": 540,
+        "color": 3
+      },
+      "id": "6d85396d-a997-4a8e-a1e6-82a9bdb8c339",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2432,
+        2064
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## STEP 1 - GOOGLE SHEET\nCreate a [Google Sheet like this](https://docs.google.com/spreadsheets/d/193tDO6xw8aSMO7lVC5kFyvlnmAdpHyGMmUbLBJUhhNs/edit?usp=sharing).\n\nPlease insert:\n- in the \"IMAGE\" column the basic image of your face\n- in the \"PROMPT\" column set the prompt\n\nLeave the \"VIDEO\" and \"YOUTUBE\" column unfilled. It will be inserted by the system once the image has been created",
+        "height": 220,
+        "width": 740
+      },
+      "id": "8ef2af97-1009-43f7-863c-c852822d5f06",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2432,
+        2976
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "383d112e-2cc6-4dd4-8985-f09ce0bd1781",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "COMPLETED"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "132f82af-3cbe-491c-8a5c-bfd6be058d69",
+      "name": "Completed?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        3680,
+        3968
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "193tDO6xw8aSMO7lVC5kFyvlnmAdpHyGMmUbLBJUhhNs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/193tDO6xw8aSMO7lVC5kFyvlnmAdpHyGMmUbLBJUhhNs/edit?usp=drivesdk",
+          "cachedResultName": "Image to Video"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11ebWJvwwXHgvQld9kxywKQUvIoBw6xMa0g0BuIqHDxE/edit#gid=0",
+          "cachedResultName": "Foglio1"
+        },
+        "columns": {
+          "value": {
+            "RESULT": "={{ $('Get Url Video').item.json.video.url }}",
+            "row_number": "={{ $('Get new video').item.json.row_number }}"
+          },
+          "schema": [
+            {
+              "id": "FACE IMAGE",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "FACE IMAGE",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "GIF IMAGE",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "GIF IMAGE",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "RESULT",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "RESULT",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": true,
+              "required": false,
+              "displayName": "row_number",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "row_number"
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "0d6c942b-04c5-4efd-b968-aa3583332627",
+      "name": "Update result",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        3360,
+        4224
+      ],
+      "typeVersion": 4.5
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c713d31f-9abd-496a-ac79-e8e2efe60aa0",
+              "name": "image",
+              "type": "string",
+              "value": "={{ $json.IMAGE }}"
+            },
+            {
+              "id": "58fb5e76-6576-4d16-8b25-b931c7935c01",
+              "name": "prompt",
+              "type": "string",
+              "value": "={{ $json.PROMPT }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c0c9f07d-86d7-41f6-80d2-f3e752829634",
+      "name": "Set data",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        2880,
+        3968
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "content": "## STEP 4 - MAIN FLOW\nStart the workflow manually or periodically by hooking the \"Schedule Trigger\" node. It is recommended to set it at 5 minute intervals.",
+        "height": 100,
+        "width": 740
+      },
+      "id": "c10b4f69-0b55-401c-8542-057a2523286f",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2432,
+        3664
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## STEP 2 - GET API KEY (YOURAPIKEY)\nCreate an account [here](https://fal.ai/) and obtain API KEY.\nIn the node \"Create Image\" set \"Header Auth\" and set:\n- Name: \"Authorization\"\n- Value: \"Key YOURAPIKEY\"",
+        "height": 140,
+        "width": 740
+      },
+      "id": "46e52f7e-835c-4f8d-b82f-db1c84c026f6",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2432,
+        3232
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "name": "={{ $now.format('yyyyLLddHHmmss') }}-{{ $json.video.file_name }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1aHRwLWyrqfzoVC8HoB-YMrBvQ4tLC-NZ",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1aHRwLWyrqfzoVC8HoB-YMrBvQ4tLC-NZ",
+          "cachedResultName": "Fal.run"
+        },
+        "options": {}
+      },
+      "id": "f93f16ab-3e56-4b70-8ba9-63b86fc84a68",
+      "name": "Upload Video",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        3184,
+        4224
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/minimax/requests/{{ $json.request_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "f0006fa5-6f28-4239-b644-061df24497e6",
+      "name": "Get Url Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2432,
+        4224
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Input: {{ $('Get new video').item.json.PROMPT }}"
+            },
+            {
+              "content": "You are a YouTube SEO expert specialized in creating engaging and optimized titles.\n\nYour task is to generate an effective title for a YouTube video based on the user's video description.\n\nGUIDELINES:\n- Maximum 60 characters to avoid truncation\n- Use relevant keywords for SEO\n- Make the title catchy and clickable\n- Avoid excessive or misleading clickbait\n- Consider the target audience of the content\n- Use numbers, questions, or power words when appropriate\n- IMPORTANT: Generate the title in the same language as the input description\n\nOUTPUT FORMAT:\nProvide only the title, without additional explanations.\n\nEXAMPLE:\nInput: \"Tutorial video on how to cook perfect pasta carbonara\"\nOutput: \"PERFECT Carbonara in 10 Minutes - Chef's Secrets\"",
+              "role": "system"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "17608266-cad8-4d1f-a2be-6571fb6369c4",
+      "name": "Generate title",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        2624,
+        4224
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Get Url Video').item.json.video.url }}",
+        "options": {}
+      },
+      "id": "51c2c580-c771-4fc4-a8a3-1fbe0b0b38d4",
+      "name": "Get File Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2960,
+        4224
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "193tDO6xw8aSMO7lVC5kFyvlnmAdpHyGMmUbLBJUhhNs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/193tDO6xw8aSMO7lVC5kFyvlnmAdpHyGMmUbLBJUhhNs/edit?usp=drivesdk",
+          "cachedResultName": "Image to Video"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11ebWJvwwXHgvQld9kxywKQUvIoBw6xMa0g0BuIqHDxE/edit#gid=0",
+          "cachedResultName": "Foglio1"
+        },
+        "columns": {
+          "value": {
+            "row_number": "={{ $('Get new video').item.json.row_number }}",
+            "YOUTUBE_URL": "=https://youtu.be/{{ $json.results.youtube.video_id }}"
+          },
+          "schema": [
+            {
+              "id": "PROMPT",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "PROMPT",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "DURATION",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "DURATION",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "VIDEO",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "VIDEO",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "YOUTUBE_URL",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "YOUTUBE_URL",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": true,
+              "required": false,
+              "displayName": "row_number",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "row_number"
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "3b753512-efea-4a7e-b411-c0f41259d280",
+      "name": "Update Youtube URL",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        3360,
+        4464
+      ],
+      "typeVersion": 4.5
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "193tDO6xw8aSMO7lVC5kFyvlnmAdpHyGMmUbLBJUhhNs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/193tDO6xw8aSMO7lVC5kFyvlnmAdpHyGMmUbLBJUhhNs/edit?usp=drivesdk",
+          "cachedResultName": "Image to Video"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/193tDO6xw8aSMO7lVC5kFyvlnmAdpHyGMmUbLBJUhhNs/edit#gid=0",
+          "cachedResultName": "Foglio1"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "VIDEO"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d7958d06-6b58-4e26-b98f-b15bbf9518ee",
+      "name": "Get new video",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        2656,
+        3968
+      ],
+      "typeVersion": 4.5
+    },
+    {
+      "parameters": {
+        "content": "Set YOUR_USERNAME in Step 3",
+        "height": 440,
+        "width": 180
+      },
+      "id": "abe78de8-837a-491b-9b43-55c46672a397",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3136,
+        4416
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## STEP 3 - Upload video on Youtube and TikTok\n- Find your API key in your [Upload-Post Manage Api Keys](https://www.upload-post.com/?linkId=lp_144414&sourceId=n3witalia&tenantId=upload-post-app) 10 FREE uploads per month\n- Set the the \"Auth Header\":\n-- Name: Authorization\n-- Value: Apikey YOUR_API_KEY_HERE\n- Create profiles to manage your social media accounts. The \"Profile\" you choose will be used in the field YOUR_USERNAME (eg. test1 or test2).  \n\n\nThe free plan allows uploads to all platforms except TikTok. To enable, please upgrade to a paid plan.",
+        "height": 220,
+        "width": 740
+      },
+      "id": "12bdcf04-8fa2-41d4-b5b7-c8d09dcbfe19",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2432,
+        3408
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "Set duration (6 or 10 sec.)",
+        "height": 200,
+        "width": 180
+      },
+      "id": "c701ad57-a4b1-4233-a0fe-3748165e8682",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3056,
+        3904
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/minimax/hailuo-02/standard/image-to-video",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n     \"prompt\": \"{{ $json.prompt }}\",\n     \"image_url\": \"{{ $json.image }}\",\n     \"duration\": \"6\",\n     \"prompt_optimizer\": true\n   }",
+        "options": {}
+      },
+      "id": "05580e6e-38e2-4bac-9337-11889ae7e17e",
+      "name": "Create video",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3104,
+        3968
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.upload-post.com/api/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{ $('Generate title').item.json.message.content }}"
+            },
+            {
+              "name": "user",
+              "value": "YOUR_USERNAME"
+            },
+            {
+              "name": "platform[]",
+              "value": "youtube"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "video",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "39cb0f7a-148a-4142-823c-e67492e7cb16",
+      "name": "Upload on Youtube",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3184,
+        4464
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.upload-post.com/api/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{ $('Generate title').item.json.message.content }}"
+            },
+            {
+              "name": "user",
+              "value": "YOUR_USERNAME"
+            },
+            {
+              "name": "platform[]",
+              "value": "tiktok"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "video",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "72d8d32f-438c-432c-b335-dc09710f40d5",
+      "name": "Upload on TikTok",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3184,
+        4688
+      ],
+      "typeVersion": 4.2
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Set data": {
+      "main": [
+        [
+          {
+            "node": "Create video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Completed?": {
+      "main": [
+        [
+          {
+            "node": "Get Url Video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 60 sec.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get status": {
+      "main": [
+        [
+          {
+            "node": "Completed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create video": {
+      "main": [
+        [
+          {
+            "node": "Wait 60 sec.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Video": {
+      "main": [
+        [
+          {
+            "node": "Update result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 60 sec.": {
+      "main": [
+        [
+          {
+            "node": "Get status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Url Video": {
+      "main": [
+        [
+          {
+            "node": "Generate title",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get new video": {
+      "main": [
+        [
+          {
+            "node": "Set data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate title": {
+      "main": [
+        [
+          {
+            "node": "Get File Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get File Video": {
+      "main": [
+        [
+          {
+            "node": "Upload Video",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload on Youtube",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload on TikTok",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload on Youtube": {
+      "main": [
+        [
+          {
+            "node": "Update Youtube URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get new video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cd064606110cd556c28b75944cc984cddb10bbdd63deca196ea4cb4095990bc2"
+  },
+  "tags": []
+}

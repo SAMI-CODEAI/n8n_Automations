@@ -1,0 +1,196 @@
+{
+  "name": "Generate video clips from your multiple image references",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## What this workflow does\n\nDesigned for agencies and social media managers, this flow creates a **secure Connect Accounts page** so your client can link their social profiles **without sharing passwords**, and includes a simple **publisher form** to post to multiple platforms via Upload-Post.\n\n### How it works\n1) **Create user** in **Upload-Post** (or reuse if it already exists).  \n2) **Generate a one-hour Connect link (JWT)** branded with your logo.  \n3) **Send the link via Telegram** to your client.  \n4) **Post Publisher form:** once the client connects their accounts, submit a title/description + media and (optionally) a Facebook Page ID.  \n5) **Publish to multiple platforms** (Facebook, Instagram, TikTok, YouTube) using Upload-Post.\n\n### After the client connects, you can publish from\n- **Upload-Post Dashboard:** https://app.upload-post.com/dashboard  \n- **Upload-Post API**  \n- **Your own n8n flows** (using the created `profileName`)\n\n### Requirements\n- **Upload-Post** credentials  \n- **Telegram Bot** (or swap this node for Email/Gmail if you prefer)\n\n### Tips\n- Brand the Connect page with `brandName` and `logoImage`.  \n- You can optionally restrict which networks appear with `allowedPlatforms`.  \n- The Connect link **expires in 1 hour** (TTL), regenerate as needed.",
+        "height": 672,
+        "width": 800
+      },
+      "id": "1ca7203b-b11c-4eb4-aaae-3006cb9bf448",
+      "name": "About this workflow",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2096,
+        1024
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "id": "0da27b73-2b39-40b6-98f4-5c0ee8cbc84a",
+      "name": "When clicking ‘Execute workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        2976,
+        1152
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "users",
+        "operation": "createUser"
+      },
+      "id": "b30c87f4-c3f9-4453-891f-e92b580a6bb9",
+      "name": "Create user",
+      "type": "n8n-nodes-preview-upload-post.uploadPost",
+      "position": [
+        3168,
+        1152
+      ],
+      "typeVersion": 1,
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "resource": "users",
+        "operation": "generateJwt"
+      },
+      "id": "644d5246-4883-4292-b4d6-e806f7e85ae1",
+      "name": "Generate jwt for platform integration",
+      "type": "n8n-nodes-preview-upload-post.uploadPost",
+      "position": [
+        3376,
+        1152
+      ],
+      "typeVersion": 1,
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "chatId": "123456789",
+        "text": "=Url for connect accounts generated: {{ $json.access_url }}",
+        "additionalFields": {}
+      },
+      "id": "eb831a7c-c87e-4fcd-9552-e42e1adcb907",
+      "name": "Send a text message",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        3584,
+        1152
+      ],
+      "webhookId": "2eb0d804-a0fd-483f-aa60-2d2065f684aa",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "formTitle": "Post Publisher",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Upload-Post Account",
+              "placeholder": "User Profile name set on Upload-post.com",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Description",
+              "fieldType": "textarea",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Upload",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "acceptFileTypes": ".jpg,.mp4",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Facebook Id",
+              "placeholder": "Facebook page Id (eg. +1234567890)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9ec82b4c-b670-4fb0-a0ea-da31d06d7b11",
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        3168,
+        1440
+      ],
+      "webhookId": "bb578d47-feaa-4973-96df-659089838de5",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "resource": "uploads",
+        "operation": "uploadVideo"
+      },
+      "id": "cdb8a16b-c447-4dee-a4df-9ceccab14eeb",
+      "name": "Upload a video",
+      "type": "n8n-nodes-preview-upload-post.uploadPost",
+      "position": [
+        3376,
+        1440
+      ],
+      "typeVersion": 1,
+      "credentials": {}
+    }
+  ],
+  "pinData": {
+    "When clicking ‘Execute workflow’": [
+      {
+        "json": {}
+      }
+    ]
+  },
+  "connections": {
+    "Create user": {
+      "main": [
+        [
+          {
+            "node": "Generate jwt for platform integration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Upload a video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Create user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate jwt for platform integration": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cd064606110cd556c28b75944cc984cddb10bbdd63deca196ea4cb4095990bc2"
+  },
+  "tags": []
+}

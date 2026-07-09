@@ -1,0 +1,742 @@
+{
+  "name": "AI Video Avatar Generator: Turn URLs into Shorts (Using Free Tier APIS)",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "=https://api.upload-post.com/api/uploadposts/ffmpeg/jobs/{{ $json.job_id }}/download",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "id": "f8c30141-b801-4490-81f6-963efc559d66",
+      "name": "Download Audio",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        4448,
+        608
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.upload-post.com/api/uploadposts/ffmpeg/jobs/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "Video"
+            },
+            {
+              "name": "full_command",
+              "value": "=ffmpeg -y -i {input} -map a:0 -vn -ac 1 -ar 16000 -c:a pcm_s16le {output}"
+            },
+            {
+              "name": "output_extension",
+              "value": "wav"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ca1e6ad1-c3a4-47da-bbb7-70d76c2c5b48",
+      "name": "FFmpeg: Extract Audio",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3744,
+        736
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "resource": "uploads",
+        "operation": "uploadVideo"
+      },
+      "id": "447c9995-fcfe-4c42-94a6-1fbd2e9708ff",
+      "name": "Schedule to TikTok, Instagram, and YouTube",
+      "type": "n8n-nodes-preview-upload-post.uploadPost",
+      "position": [
+        6672,
+        592
+      ],
+      "typeVersion": 1,
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: item.json.{text, words, duration} del nodo Whisper\nreturn items.map(item => {\n  const dur = Number(item.json.duration || 0);\n\n  // Redondea a 3 decimales y mantiene tipo number\n  const round3 = (n) => Math.round(Number(n) * 1000) / 1000;\n\n  const wordsLLM = (item.json.words || []).map(w => ({\n    w: w.word,\n    s: round3(w.start),\n    e: round3(w.end),\n  }));\n\n  item.json.video_duration = round3(dur);\n  item.json.words_llm = wordsLLM;      // array limpio para la IA\n  item.json.text_llm  = item.json.text; // texto tal cual (o límpialo si quieres)\n\n  return item;\n});\n"
+      },
+      "id": "47b4707b-0e89-44b3-b76d-9fbf6c8fac87",
+      "name": "Parse Whisper Results",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        4816,
+        608
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "f7417e3d-f216-4fe6-b0a0-6588cdb54f30",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "position": [
+        5024,
+        816
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a senior short-form video editor. Read the ENTIRE transcription and word-level timestamps to pick the 3–15 MOST VIRAL moments for TikTok/IG Reels/YouTube Shorts. Each clip must be 15–60 seconds.\n\n⚠️ FFMPEG TIMING CONTRACT — HARD REQUIREMENTS:\n- Return timestamps as ABSOLUTE SECONDS from video start (usable in: ffmpeg -ss <start> -to <end> -i <input> …).\n- Numbers ONLY with DOT decimal, up to 3 decimals (examples: 0, 1.250, 17.350).\n- Ensure 0 ≤ start < end ≤ VIDEO_DURATION_SECONDS.\n- Each clip 15–60s inclusive.\n- Prefer starting 0.2–0.4s BEFORE the hook and ending 0.2–0.4s AFTER the payoff.\n- Use silent moments for natural cuts; never cut mid-word or mid-phrase.\n- STRICTLY NO time formats other than absolute seconds.\n\nVIDEO_DURATION_SECONDS: {{ $json.video_duration }}\n\nTRANSCRIPT_TEXT (raw):\n{{ JSON.stringify($json.text_llm) }}\n\nWORDS_JSON (array of {w, s, e} where s/e are seconds):\n{{ JSON.stringify($json.words_llm) }}\n\nHARD EXCLUSIONS:\n- No generic intros/outros or sponsor-only segments unless they contain the hook.\n- No clips < 15s or > 60s.\n\nOUTPUT — RETURN ONLY VALID JSON (no markdown, no comments). Order clips by predicted performance (best first):\n{\n  \"shorts\": [\n    {\n      \"start\": <number seconds, e.g. 12.340>,\n      \"end\": <number seconds, e.g. 37.900>,\n      \"video_description_for_tiktok\": \"<tiktok video description for get views>\",\n      \"video_description_for_instagram\": \"<instagram video description for get views>\",\n      \"video_title_for_youtube_short\": \"<youtube short video title for get views>\",\n\n    }\n  ]\n}\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "id": "9b06072b-f603-40bd-a511-6609ca98754e",
+      "name": "AI Agent - Select Viral Clips",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        5024,
+        608
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/audio/transcriptions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "model",
+              "value": "whisper-1"
+            },
+            {
+              "name": "response_format",
+              "value": "verbose_json"
+            },
+            {
+              "name": "timestamp_granularities[]",
+              "value": "word"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ae4dadaf-2522-40c3-bfaf-7d461b4da2c7",
+      "name": "Whisper: Transcribe with Timestamps",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        4624,
+        608
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {},
+      "id": "a437dd23-0cb5-4f88-a18b-055142ed29fc",
+      "name": "Wait 5s & Retry (Audio)",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        4448,
+        752
+      ],
+      "webhookId": "259572b2-f378-479f-8f2e-219635986fc4",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 1,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "60615090-7a29-4573-9b47-369d6a3e95e9",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "finished"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e71a29ed-482a-455b-b552-d6582fde3413",
+      "name": "Is Audio Job Completed?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        4272,
+        736
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "url": "=https://api.upload-post.com/api/uploadposts/ffmpeg/jobs/{{ $json.job_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "f743abe3-0cea-44ab-8599-5984fa5e48d7",
+      "name": "Check Audio Job Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        4112,
+        736
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "id": "cc605ccc-a5c5-4066-8b2b-aafbb6692d5e",
+      "name": "Wait 10s (Audio)",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        3904,
+        736
+      ],
+      "webhookId": "cc0bf0ea-46f3-415c-b08a-0126aa1bb33b",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "path": "352a575b-42cf-4e9b-8d76-6acec4e40402",
+        "formTitle": "🎬 Video to Viral Shorts",
+        "formDescription": "Upload your video and automatically create viral shorts with AI. Depending on the video's length, 3 to 6 shorts will be generated and automatically scheduled to be uploaded one per day at this time starting tomorrow.\n",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Video",
+              "fieldType": "file",
+              "acceptFileTypes": "video/*",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e29a8a46-9ab0-4f34-8fd0-04b7fcd782b9",
+      "name": "Form: Upload Video",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        3536,
+        736
+      ],
+      "webhookId": "352a575b-42cf-4e9b-8d76-6acec4e40402",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {},
+      "id": "ec505fe5-0fe4-4e50-846a-5700ae0c358f",
+      "name": "Wait 5s & Retry (Short)",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        6400,
+        752
+      ],
+      "webhookId": "259572b2-f378-479f-8f2e-219635986fc4",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "url": "=https://api.upload-post.com/api/uploadposts/ffmpeg/jobs/{{ $json.job_id }}/download",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "id": "f3d4b793-56a0-4eca-8787-ca9516b888a5",
+      "name": "Download Short",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        6400,
+        592
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 1,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "60615090-7a29-4573-9b47-369d6a3e95e9",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "finished"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3a4d4841-b0bd-4a66-9ecf-c4fb44be71fd",
+      "name": "Is Short Job Completed?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        6144,
+        608
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "url": "=https://api.upload-post.com/api/uploadposts/ffmpeg/jobs/{{ $json.job_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "888e85ad-a0b6-494e-98a1-352725894ddb",
+      "name": "Check Short Job Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        5920,
+        608
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "id": "4e9beccb-e576-4f8b-bddc-e6420ee92039",
+      "name": "Wait 10s (Short)",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        5712,
+        608
+      ],
+      "webhookId": "cc0bf0ea-46f3-415c-b08a-0126aa1bb33b",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get Gemini response\nconst data = $input.first().json;\nconst formData = $('Form: Upload Video').first();\n\n// --- Config opcional ---\nconst VIDEO_DURATION_SECONDS =\n  Number(formData?.json?.videoDurationSeconds) ||\n  Number(formData?.json?.duration) ||\n  Number(formData?.json?.meta?.durationSec) ||\n  null;\n\n// --- Helpers ---\nconst toMs = (v) => (isFinite(Number(v)) ? Math.round(Number(v) * 1000) : 0);\n\nconst stripCodeFences = (txt) =>\n  String(txt || '')\n    .replace(/```json\\s*/gi, '')\n    .replace(/```\\s*/g, '')\n    .trim();\n\nconst extractJsonObject = (txt) => {\n  // 1) intenta parse directo\n  try { return JSON.parse(txt); } catch {}\n  // 2) intenta localizar el primer {...}\n  const m = String(txt).match(/\\{[\\s\\S]*\\}/);\n  if (m) {\n    try { return JSON.parse(m[0]); } catch {}\n  }\n  throw new Error('No se pudo extraer JSON válido del texto:\\n' + String(txt).slice(0, 300));\n};\n\nconst pickText = (payload) => {\n  // Nuevos formatos (string en 'output')\n  if (typeof payload === 'string') return payload;\n  if (payload?.output) return payload.output;\n\n  // Antiguos formatos (content.parts[0].text)\n  if (Array.isArray(payload) && payload[0]?.output) return payload[0].output;\n  if (Array.isArray(payload) && payload[0]?.content?.parts?.[0]?.text) return payload[0].content.parts[0].text;\n  if (payload?.content?.parts?.[0]?.text) return payload.content.parts[0].text;\n\n  // Otros\n  if (payload?.response) return payload.response;\n  if (payload?.text) return payload.text;\n\n  // Último recurso: stringify\n  return JSON.stringify(payload);\n};\n\n// --- 1) Extrae texto crudo del output ---\nlet textResponse = pickText(data);\n\n// --- 2) Limpia fences y parsea el JSON interior ---\ntextResponse = stripCodeFences(textResponse);\nlet parsed = extractJsonObject(textResponse);\n\n// Si vino envuelto otra vez dentro de 'output', vuelve a parsear\nif (!parsed?.shorts && typeof parsed?.output === 'string') {\n  parsed = extractJsonObject(stripCodeFences(parsed.output));\n}\n\nconst shorts = Array.isArray(parsed?.shorts) ? parsed.shorts : [];\nif (!shorts.length) {\n  throw new Error('Gemini no encontró segmentos interesantes');\n}\n\n// --- 3) Normalización opcional (si Gemini mandó fracciones 0–1 y conocemos D) ---\nconst MIN = 15, MAX = 60;\nconst clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));\n\nconst vf = \"scale='min(1080,iw)':'min(1920,ih)':force_original_aspect_ratio=increase,crop=1080:1920,setsar=1\";\n\nreturn shorts.map((s, i) => {\n  let startSec = Number(s.start);\n  let endSec   = Number(s.end);\n\n  if (!isFinite(startSec) || !isFinite(endSec)) {\n    throw new Error(`Timestamps inválidos en short #${i + 1}`);\n  }\n\n  // Si parecen porcentajes 0–1 y tenemos duración del vídeo, conviértelo a segundos\n  if (VIDEO_DURATION_SECONDS && endSec <= 1.001) {\n    startSec *= VIDEO_DURATION_SECONDS;\n    endSec   *= VIDEO_DURATION_SECONDS;\n  }\n\n  // Fuerza rango 15–60s de forma suave\n  let duration = endSec - startSec;\n  if (duration < MIN) endSec = startSec + MIN;\n  if (duration > MAX) endSec = startSec + MAX;\n  duration = endSec - startSec;\n\n  // Mantén dentro de la duración del vídeo (si la sabemos)\n  if (VIDEO_DURATION_SECONDS) {\n    startSec = clamp(startSec, 0, Math.max(0, VIDEO_DURATION_SECONDS - MIN));\n    endSec   = clamp(endSec, startSec + MIN, VIDEO_DURATION_SECONDS);\n    duration = endSec - startSec;\n  }\n\n  // Redondeos\n  const start = Number(startSec.toFixed(3));\n  const end   = Number(endSec.toFixed(3));\n  const dur   = Number(duration.toFixed(3));\n\n  // Construye el comando FFmpeg completo (usa -t = duración)\n  const ffmpegCmd =\n    `ffmpeg -y -hide_banner -loglevel error ` +\n    `-ss ${start} -t ${dur} -i {input} ` +\n    `-c:v h264_nvenc -cq 22 -vf \"${vf}\" ` +\n    `-c:a aac -b:a 128k -ar 48000 -ac 2 -movflags +faststart {output}`;\n\n  return {\n    json: {\n      index: i + 1,\n      startTime: start,\n      endTime: end,\n      duration: dur,\n      startTimeMs: toMs(start),\n      endTimeMs: toMs(end),\n      durationMs: toMs(dur),\n      video_description_for_tiktok: s.video_description_for_tiktok ?? '',\n      video_description_for_instagram: s.video_description_for_instagram ?? '',\n      video_title_for_youtube_short: s.video_title_for_youtube_short ?? '',\n      full_command: ffmpegCmd\n    },\n    binary: formData.binary\n  };\n});\n"
+      },
+      "id": "5f9f0a77-4957-4053-9f91-762692835c68",
+      "name": "Parse Gemini Analysis",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        5328,
+        608
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "content": "**AUTO-SHORTS GENERATOR**\n\n**How it Works:**\n1.  Upload a long video via the form.\n2.  AI transcribes the audio (Whisper) and finds the most viral clips (Gemini).\n3.  The clips are auto-cut, cropped, and prepared for social media.\n4.  Shorts are scheduled to post daily on TikTok, Instagram, and YouTube.\n\n**Quick Setup:**\n1.  **OpenAI Whisper:** Add your API key to the `Whisper: Transcribe` node.\n2.  **Google Gemini:** Add your Google AI Studio API key to the `Google Gemini Chat Model` node.\n3.  **Upload-Post:**\n    *   Sign up at `app.upload-post.com` & connect your social accounts.\n    *   Generate an API token.\n    *   In n8n, create credentials for the `HTTP Request` nodes (Header Auth) and the `Schedule...` node (Upload-Post API) using that token.\n4.  **Scheduling:** Adjust the post time and timezone in the `Schedule to...` node.\n5.  **To Run:** Use the URL from the `Form: Upload Video` node to upload your video.",
+        "height": 592,
+        "width": 480,
+        "color": 7
+      },
+      "id": "cea60425-ea19-42bb-940e-04906be5cc67",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3488,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.upload-post.com/api/uploadposts/ffmpeg/jobs/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "Video"
+            },
+            {
+              "name": "full_command",
+              "value": "=ffmpeg -y -hide_banner -loglevel error -ss {{ $json.startTime }} -t {{ $json.duration }} -i {input} -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2,setsar=1\" -c:v h264_nvenc -cq 22 -pix_fmt yuv420p -c:a aac -b:a 128k -ar 48000 -ac 2 -movflags +faststart {output}"
+            },
+            {
+              "name": "output_extension",
+              "value": "mp4"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5a916dbd-a0a8-4eeb-b581-5a25d7014e37",
+      "name": "FFmpeg: Upload & Cut",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        5504,
+        608
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "content": "**Intake & Form**\n- Form: Upload Video",
+        "height": 352,
+        "width": 228
+      },
+      "id": "d91da2ae-3731-4977-9a45-d58a1f90d63a",
+      "name": "Section: Intake & Form",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3488,
+        592
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "**Transcription & Parsing**\n- Whisper: Transcribe with Timestamps\n- Parse Whisper Results\n- Download Audio",
+        "height": 320,
+        "width": 428
+      },
+      "id": "d2154802-f532-4400-86db-0ad065fb5823",
+      "name": "Section: Transcription & Parsing",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4592,
+        480
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "**AI Selection**\n- Google Gemini Chat Model\n- AI Agent – Select Viral Clips\n- Parse Gemini Analysis",
+        "height": 480,
+        "width": 420
+      },
+      "id": "9807b8a1-8e41-46f9-bc3b-124491524849",
+      "name": "Section: AI Selection (Gemini)",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5008,
+        480
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "**FFmpeg Audio Job Loop**\n- FFmpeg: Extract Audio\n- Wait 10s (Audio) → Check Audio Job Status → Is Audio Job Completed?\n- Retry path: Wait 5s & Retry (Audio)",
+        "height": 352,
+        "width": 880
+      },
+      "id": "97843ed6-1d3f-4aaf-aed4-5e509a4a794a",
+      "name": "Section: FFmpeg Audio Job Loop",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3712,
+        592
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "**FFmpeg Short Job Loop**\n- FFmpeg: Upload & Cut\n- Wait 10s (Short) → Check Short Job Status → Is Short Job Completed?\n- Retry path: Wait 5s & Retry (Short)",
+        "height": 480,
+        "width": 1132
+      },
+      "id": "9cfeab84-7169-4d42-a5b4-bdaa299a3702",
+      "name": "Section: FFmpeg Short Job Loop",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5424,
+        480
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "**Scheduling**\n- Download Short\n- Schedule to TikTok, Instagram, and YouTube",
+        "height": 480,
+        "width": 420
+      },
+      "id": "035963e0-726e-4bfd-897d-339dacd85c80",
+      "name": "Section: Scheduling",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        6560,
+        480
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Download Audio": {
+      "main": [
+        [
+          {
+            "node": "Whisper: Transcribe with Timestamps",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Short": {
+      "main": [
+        [
+          {
+            "node": "Schedule to TikTok, Instagram, and YouTube",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 10s (Audio)": {
+      "main": [
+        [
+          {
+            "node": "Check Audio Job Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 10s (Short)": {
+      "main": [
+        [
+          {
+            "node": "Check Short Job Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Form: Upload Video": {
+      "main": [
+        [
+          {
+            "node": "FFmpeg: Extract Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FFmpeg: Upload & Cut": {
+      "main": [
+        [
+          {
+            "node": "Wait 10s (Short)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FFmpeg: Extract Audio": {
+      "main": [
+        [
+          {
+            "node": "Wait 10s (Audio)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Gemini Analysis": {
+      "main": [
+        [
+          {
+            "node": "FFmpeg: Upload & Cut",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Whisper Results": {
+      "main": [
+        [
+          {
+            "node": "AI Agent - Select Viral Clips",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Audio Job Status": {
+      "main": [
+        [
+          {
+            "node": "Is Audio Job Completed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Short Job Status": {
+      "main": [
+        [
+          {
+            "node": "Is Short Job Completed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Audio Job Completed?": {
+      "main": [
+        [
+          {
+            "node": "Download Audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 5s & Retry (Audio)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Short Job Completed?": {
+      "main": [
+        [
+          {
+            "node": "Download Short",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 5s & Retry (Short)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 5s & Retry (Audio)": {
+      "main": [
+        [
+          {
+            "node": "Check Audio Job Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 5s & Retry (Short)": {
+      "main": [
+        [
+          {
+            "node": "Check Short Job Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - Select Viral Clips",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent - Select Viral Clips": {
+      "main": [
+        [
+          {
+            "node": "Parse Gemini Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Whisper: Transcribe with Timestamps": {
+      "main": [
+        [
+          {
+            "node": "Parse Whisper Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cd064606110cd556c28b75944cc984cddb10bbdd63deca196ea4cb4095990bc2"
+  },
+  "tags": []
+}

@@ -1,0 +1,583 @@
+{
+  "name": "Generate video clips from your multiple image references",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/vidu/requests/{{ $('Create Video').item.json.request_id }}/status ",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "47a4d912-eaa5-4b98-8652-c302e5fd6631",
+      "name": "Get status",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1712,
+        1296
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "amount": 60
+      },
+      "id": "ff9cadbb-971a-42e8-adea-15601bcc952c",
+      "name": "Wait 60 sec.",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        1536,
+        1296
+      ],
+      "webhookId": "fc935720-a6b1-458b-9142-e79b039c7de3",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "content": "# Generate video clips from your multiple image references \n\nThis workflow automates the process of creating **short videos from multiple image references** (up to 7 images). It uses \"Vidu Reference to Video\" model, a video generation API to transform a user-provided prompt and image set into a consistent, **AI-generated video**.\n\nThis workflow automates the process of generating AI-powered videos from a set of reference images and then uploading them to **TikTok** and **Youtube**. The process is initiated via a user-friendly web form.\n\n\n\n\n\n",
+        "height": 280,
+        "width": 740,
+        "color": 3
+      },
+      "id": "d8913c43-acb1-404d-ab3e-958185156146",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        640,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "383d112e-2cc6-4dd4-8985-f09ce0bd1781",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "COMPLETED"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a3281b91-4baf-4b6d-bfa3-cc816551fa58",
+      "name": "Completed?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1888,
+        1296
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c713d31f-9abd-496a-ac79-e8e2efe60aa0",
+              "name": "prompt",
+              "type": "string",
+              "value": "={{ $('On form submission').item.json.Prompt }}"
+            },
+            {
+              "id": "2308096c-702f-4ed1-9de3-c77d9685609e",
+              "name": "reference_images",
+              "type": "array",
+              "value": "={{ $json.reference_image_urls }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "23ce8602-9467-425f-86c7-93181cabcde6",
+      "name": "Set data",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1088,
+        1296
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "content": "## STEP 2 - MAIN FLOW\nStart the workflow manually or periodically by hooking the \"Schedule Trigger\" node. It is recommended to set it at 5 minute intervals.",
+        "height": 100,
+        "width": 740
+      },
+      "id": "dc2238a7-5e63-45da-baa2-4b493eff1ee2",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        640,
+        768
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## STEP 1 - GET API KEY (YOURAPIKEY)\nCreate an account [here](https://fal.ai/) and obtain API KEY.\nIn the node \"Create Image\" set \"Header Auth\" and set:\n- Name: \"Authorization\"\n- Value: \"Key YOURAPIKEY\"",
+        "height": 140,
+        "width": 740
+      },
+      "id": "2c6c7312-6f19-444b-a8d9-ec289b87959a",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        640,
+        320
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "Set API Key created in Step 1",
+        "height": 200,
+        "width": 180
+      },
+      "id": "eb0061be-56c6-489e-807d-2cb18ba7ee69",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1264,
+        1232
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/vidu/q1/reference-to-video",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n     \"prompt\": \"{{ $json.prompt }}\",\n     \"reference_image_urls\": {{ $json.reference_images.toJsonString() }},\n     \"aspect_ratio\": \"16:9\",\n     \"movement_amplitude\": \"auto\"\n}",
+        "options": {}
+      },
+      "id": "f4635f0e-a9f0-4fb8-8fcc-c9e785295ff1",
+      "name": "Create Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1312,
+        1296
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/vidu/requests/{{ $json.request_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "9c7afece-e5c4-4f29-aaef-86eed78b6909",
+      "name": "Get Url Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        640,
+        1680
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Get Url Video').item.json.video.url }}",
+        "options": {}
+      },
+      "id": "1311987c-4d0c-40ec-89b1-3516d06cf7e1",
+      "name": "Get File Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1264,
+        1680
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "name": "={{ $now.format('yyyyLLddHHmmss') }}-{{ $('Get Url Video').item.json.video.file_name }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1aHRwLWyrqfzoVC8HoB-YMrBvQ4tLC-NZ",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1aHRwLWyrqfzoVC8HoB-YMrBvQ4tLC-NZ",
+          "cachedResultName": "Fal.run"
+        },
+        "options": {}
+      },
+      "id": "4e517eb0-7999-4aa7-8b17-16be3512d79f",
+      "name": "Upload Video",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        1552,
+        1552
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini",
+          "cachedResultName": "GPT-5-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Input: {{ $('Set data').item.json.prompt }}"
+            },
+            {
+              "content": "You are a YouTube SEO expert specialized in creating engaging and optimized titles.\n\nYour task is to generate an effective title for a YouTube video based on the user's video description.\n\nGUIDELINES:\n- Maximum 60 characters to avoid truncation\n- Use relevant keywords for SEO\n- Make the title catchy and clickable\n- Avoid excessive or misleading clickbait\n- Consider the target audience of the content\n- Use numbers, questions, or power words when appropriate\n- IMPORTANT: Generate the title in the same language as the input description\n\nOUTPUT FORMAT:\nProvide only the title, without additional explanations.\n\nEXAMPLE:\nInput: \"Tutorial video on how to cook perfect pasta carbonara\"\nOutput: \"PERFECT Carbonara in 10 Minutes - Chef's Secrets\"",
+              "role": "system"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4a8de5c8-33f0-4700-9a78-155d6eaf69b0",
+      "name": "Generate title",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        896,
+        1680
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "content": "Set YOUR_USERNAME in Step 2",
+        "height": 408,
+        "width": 180
+      },
+      "id": "bb42ad82-1126-4126-9874-d7e8e3bc0af1",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1536,
+        1712
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## STEP 2 - Upload video on Youtube and TikTok\n- Find your API key in your [Upload-Post Manage Api Keys](https://www.upload-post.com/?linkId=lp_144414&sourceId=n3witalia&tenantId=upload-post-app) 10 FREE uploads per month\n- Set the the \"Auth Header\":\n-- Name: Authorization\n-- Value: Apikey YOUR_API_KEY_HERE\n- Create profiles to manage your social media accounts. The \"Profile\" you choose will be used in the field YOUR_USRNAME (eg. test1 or test2).  \n\n\nThe free plan allows uploads to all platforms except TikTok. To enable, please upgrade to a paid plan.",
+        "height": 232,
+        "width": 740
+      },
+      "id": "efd54df8-e8d8-46d7-be03-e303092e548c",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        640,
+        496
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.upload-post.com/api/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{ $('Generate title').item.json.message.content }}"
+            },
+            {
+              "name": "user",
+              "value": "YOUR_USERNAME"
+            },
+            {
+              "name": "platform[]",
+              "value": "tiktok"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "video",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "29c38c40-d4e9-4f8c-b07a-d01cd142cd20",
+      "name": "Upload on TikTok",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1552,
+        1968
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "formTitle": "Reference to video",
+        "formDescription": "In \"Refernce images\" add url images separated by comma eg:\n\nhttps://url.com/1.jpg,\nhttps://url.com/1.jpg,\nhttps://url.com/1.jpg\n",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Prompt",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Reference images",
+              "fieldType": "textarea",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0faf742c-9a67-496d-91e9-6a22043ccb7c",
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        672,
+        1296
+      ],
+      "webhookId": "3e1755d7-4963-4891-838a-46d301429da3",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Ottieni il campo con la stringa originale (modifica il campo se necessario)\nconst inputString = $json[\"Reference images\"];\n\n// 1. Rimuove spazi extra e newline\n// 2. Divide la stringa in un array\n// 3. Filtra gli elementi vuoti\n// 4. Ritorna come array JSON\n\nconst urlsArray = inputString\n  .split(/,\\s*|\\r\\n+/) // divide su virgole e newline\n  .filter(url => url.trim() !== \"\");\n\nreturn [\n  {\n    json: {\n      reference_image_urls: urlsArray\n    }\n  }\n];"
+      },
+      "id": "72cec3ce-62a0-46db-84c8-965f7b7c113a",
+      "name": "Array",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        880,
+        1296
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "content": "## Example On Form Submit\nPrompt:\nThe girl is showing a pair of shoes to the monkey in the forest\n\nReference images:\nhttps://n3wstorage.b-cdn.net/n3witalia/result3.png,\nhttps://n3wstorage.b-cdn.net/n3witalia/shoes.png,\nhttps://n3wstorage.b-cdn.net/n3witalia/monkey.jpeg\n\nResult:\nhttps://n3wstorage.b-cdn.net/n3witalia/output_reference.mp4\n\n",
+        "height": 272,
+        "width": 736,
+        "color": 4
+      },
+      "id": "0f2bf129-8db2-4059-9d80-718ba6a4ce6f",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        640,
+        912
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.upload-post.com/api/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{ $('Generate title').item.json.message.content }}"
+            },
+            {
+              "name": "user",
+              "value": "YOUR_USERNAME"
+            },
+            {
+              "name": "platform[]",
+              "value": "youtube"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "video",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b6c16284-3005-4fd5-b747-5590674cefc2",
+      "name": "Upload to Youtube",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1552,
+        1776
+      ],
+      "typeVersion": 4.2
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Array": {
+      "main": [
+        [
+          {
+            "node": "Set data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set data": {
+      "main": [
+        [
+          {
+            "node": "Create Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Completed?": {
+      "main": [
+        [
+          {
+            "node": "Get Url Video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 60 sec.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get status": {
+      "main": [
+        [
+          {
+            "node": "Completed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Video": {
+      "main": [
+        [
+          {
+            "node": "Wait 60 sec.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 60 sec.": {
+      "main": [
+        [
+          {
+            "node": "Get status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Url Video": {
+      "main": [
+        [
+          {
+            "node": "Generate title",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate title": {
+      "main": [
+        [
+          {
+            "node": "Get File Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get File Video": {
+      "main": [
+        [
+          {
+            "node": "Upload Video",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload to Youtube",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload on TikTok",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cd064606110cd556c28b75944cc984cddb10bbdd63deca196ea4cb4095990bc2"
+  },
+  "tags": []
+}

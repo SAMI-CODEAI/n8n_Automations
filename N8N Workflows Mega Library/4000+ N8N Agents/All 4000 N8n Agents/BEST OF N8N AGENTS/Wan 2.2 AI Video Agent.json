@@ -1,0 +1,884 @@
+{
+  "name": "Wan 2.2 AI Video Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "form",
+        "formTitle": "Files",
+        "formDescription": "Upload your actual video and the reference image ",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Your Video",
+              "fieldType": "file",
+              "acceptFileTypes": ".mp4",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Your Reference Image",
+              "fieldType": "file",
+              "acceptFileTypes": ".png,.jpeg,.jpg",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d18eb35e-7e84-4b83-9ca4-c0f0866c2bf2",
+      "name": "Form Submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        -16
+      ],
+      "webhookId": "your-webhook-id"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "a3192a6e-9da7-46a8-b3b5-795d4bb5a2b9",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [
+        864,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/wan/v2.2-14b/animate/replace",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Key 0eab98ca-0951-4e62-9ec8-1a494d337964:3078b41999bb8c46fcb2598e300222c8"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "video_url",
+              "value": "={{ $json.videoUrl }}"
+            },
+            {
+              "name": "image_url",
+              "value": "={{ $json.imageUrl }}"
+            },
+            {
+              "name": "resolution",
+              "value": "480p"
+            },
+            {
+              "name": "video_quality",
+              "value": "low"
+            },
+            {
+              "name": "video_write_mode\": \"balanced",
+              "value": "fast"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7b5f4d26-4ed8-4c42-931d-64e1fcf27790",
+      "name": "Fal.ai - Wan 2.2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1120,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "id": "9f24235d-cc87-4531-9627-c24eab23dad7",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1360,
+        -16
+      ],
+      "webhookId": "wait-webhook-id"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.status_url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Key 0eab98ca-0951-4e62-9ec8-1a494d337964:3078b41999bb8c46fcb2598e300222c8"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "10219423-88ba-4ab6-a136-30a5864fa044",
+      "name": "Get Video Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1616,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "81098f30-801f-4a6e-a709-6c23d849d532",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "IN_PROGRESS",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "09fc2de2-04eb-4194-a7ae-5b1b713e2a87",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1872,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "Your_Video",
+        "name": "video file",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1H83061_KN0dz0ew6hjZMDplpJ1ZaMJK7",
+          "mode": "list",
+          "cachedResultName": "Youtube",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1H83061_KN0dz0ew6hjZMDplpJ1ZaMJK7"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        48,
+        -112
+      ],
+      "id": "f8494cf8-7aec-40f0-90c3-af09f9f96a7e",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iui61pzlZdZOlErP",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "Your_Reference_Image",
+        "name": "image file",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1H83061_KN0dz0ew6hjZMDplpJ1ZaMJK7",
+          "mode": "list",
+          "cachedResultName": "Youtube",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1H83061_KN0dz0ew6hjZMDplpJ1ZaMJK7"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        48,
+        80
+      ],
+      "id": "9ecd170c-2cc3-4d2b-958e-9edbf383a282",
+      "name": "Upload file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iui61pzlZdZOlErP",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        256,
+        -112
+      ],
+      "id": "fd6f5574-b873-41db-b7d4-ce1d2710ecb1",
+      "name": "Share file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iui61pzlZdZOlErP",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        256,
+        80
+      ],
+      "id": "e14f6141-c574-4e25-b986-0f7a5010d59c",
+      "name": "Share file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iui61pzlZdZOlErP",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst a = \"https://drive.google.com/uc?export=download&id=\"+$('Upload file').first().json.id\n\nreturn {videoUrl: a}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        -112
+      ],
+      "id": "d03ae43e-7dea-4401-ad0b-8ecdbee40d8f",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst a = \"https://drive.google.com/uc?export=download&id=\"+$('Upload file1').first().json.id\n\nreturn {imageUrl: a}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        80
+      ],
+      "id": "5ace49f1-2d5d-4fa2-ab1f-7c0f7b2d27c4",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.response_url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Key 0eab98ca-0951-4e62-9ec8-1a494d337964:3078b41999bb8c46fcb2598e300222c8"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2128,
+        0
+      ],
+      "id": "fc1b8078-edd2-4108-b5cd-5fe476ce57e7",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.video.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2336,
+        0
+      ],
+      "id": "a53a6b00-fdda-4a89-ab57-bba125d1a3ec",
+      "name": "HTTP Request1"
+    }
+  ],
+  "pinData": {
+    "Upload file1": [
+      {
+        "json": {
+          "kind": "drive#file",
+          "id": "1u9Ku2a_HNbd3fwLA5-JcQ2M7GJrXmpW2",
+          "name": "image file",
+          "mimeType": "image/jpeg",
+          "starred": false,
+          "trashed": false,
+          "explicitlyTrashed": false,
+          "parents": [
+            "1H83061_KN0dz0ew6hjZMDplpJ1ZaMJK7"
+          ],
+          "spaces": [
+            "drive"
+          ],
+          "version": "2",
+          "webContentLink": "https://drive.google.com/uc?id=1u9Ku2a_HNbd3fwLA5-JcQ2M7GJrXmpW2&export=download",
+          "webViewLink": "https://drive.google.com/file/d/1u9Ku2a_HNbd3fwLA5-JcQ2M7GJrXmpW2/view?usp=drivesdk",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/image/jpeg",
+          "hasThumbnail": true,
+          "thumbnailLink": "https://lh3.googleusercontent.com/drive-storage/AJQWtBNxErfbqLbPFC6ZR5O5s8V-RdzTWUZhaD7mQWLoYlX1EeVsp-6UbwauohpD3_-9p-e6WSkY0XJmRA_MQEFlggG9AKkBuDi2lAP99sMcKcJv2So=s220",
+          "thumbnailVersion": "1",
+          "viewedByMe": false,
+          "createdTime": "2025-10-05T15:49:43.693Z",
+          "modifiedTime": "2025-10-05T15:49:45.623Z",
+          "modifiedByMeTime": "2025-10-05T15:49:45.623Z",
+          "modifiedByMe": true,
+          "owners": [
+            {
+              "kind": "drive#user",
+              "displayName": "Tech spotlight",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocJrm3BWqucX7Pw5FZXP4Hlj8GDSoW0R7JF-49TmIIi_U2THh_s=s64",
+              "me": true,
+              "permissionId": "01477432594213140972",
+              "emailAddress": "awesomehits76@gmail.com"
+            }
+          ],
+          "lastModifyingUser": {
+            "kind": "drive#user",
+            "displayName": "Tech spotlight",
+            "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocJrm3BWqucX7Pw5FZXP4Hlj8GDSoW0R7JF-49TmIIi_U2THh_s=s64",
+            "me": true,
+            "permissionId": "01477432594213140972",
+            "emailAddress": "awesomehits76@gmail.com"
+          },
+          "shared": false,
+          "ownedByMe": true,
+          "downloadRestrictions": {
+            "itemDownloadRestriction": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            },
+            "effectiveDownloadRestrictionWithContext": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            }
+          },
+          "capabilities": {
+            "canAcceptOwnership": false,
+            "canAddChildren": false,
+            "canAddMyDriveParent": false,
+            "canChangeCopyRequiresWriterPermission": true,
+            "canChangeItemDownloadRestriction": true,
+            "canChangeSecurityUpdateEnabled": false,
+            "canChangeViewersCanCopyContent": true,
+            "canComment": true,
+            "canCopy": true,
+            "canDelete": true,
+            "canDisableInheritedPermissions": false,
+            "canDownload": true,
+            "canEdit": true,
+            "canEnableInheritedPermissions": true,
+            "canListChildren": false,
+            "canModifyContent": true,
+            "canModifyContentRestriction": true,
+            "canModifyEditorContentRestriction": true,
+            "canModifyOwnerContentRestriction": true,
+            "canModifyLabels": false,
+            "canMoveChildrenWithinDrive": false,
+            "canMoveItemIntoTeamDrive": true,
+            "canMoveItemOutOfDrive": true,
+            "canMoveItemWithinDrive": true,
+            "canReadLabels": false,
+            "canReadRevisions": true,
+            "canRemoveChildren": false,
+            "canRemoveContentRestriction": false,
+            "canRemoveMyDriveParent": true,
+            "canRename": true,
+            "canShare": true,
+            "canTrash": true,
+            "canUntrash": true
+          },
+          "viewersCanCopyContent": true,
+          "copyRequiresWriterPermission": false,
+          "writersCanShare": true,
+          "permissions": [
+            {
+              "kind": "drive#permission",
+              "id": "01477432594213140972",
+              "type": "user",
+              "emailAddress": "awesomehits76@gmail.com",
+              "role": "owner",
+              "displayName": "awesomehits76",
+              "deleted": false,
+              "pendingOwner": false
+            }
+          ],
+          "permissionIds": [
+            "01477432594213140972"
+          ],
+          "originalFilename": "image file",
+          "fullFileExtension": "",
+          "fileExtension": "",
+          "md5Checksum": "cc28d09385fcbd37ef3cfd39a9fbcad5",
+          "sha1Checksum": "604445682fa310c2f0a9a29943f5fe9b37a09355",
+          "sha256Checksum": "1ad830cce4868d920a9f1e2118e117052bcabd49d025328a7c7b4084c4e2205f",
+          "size": "183568",
+          "quotaBytesUsed": "183568",
+          "headRevisionId": "0B8JQKee9AAwrNFY0bmJVZ1RGL21IRU9DUW54MnQvaGRUR0NFPQ",
+          "imageMediaMetadata": {
+            "width": 768,
+            "height": 1344,
+            "rotation": 0
+          },
+          "isAppAuthorized": true,
+          "linkShareMetadata": {
+            "securityUpdateEligible": false,
+            "securityUpdateEnabled": true
+          },
+          "inheritedPermissionsDisabled": false
+        }
+      }
+    ],
+    "Upload file": [
+      {
+        "json": {
+          "kind": "drive#file",
+          "id": "1fk_rFdmKDardc7j8WJafhYjfXRV89kMd",
+          "name": "video file",
+          "mimeType": "video/mp4",
+          "starred": false,
+          "trashed": false,
+          "explicitlyTrashed": false,
+          "parents": [
+            "1H83061_KN0dz0ew6hjZMDplpJ1ZaMJK7"
+          ],
+          "spaces": [
+            "drive"
+          ],
+          "version": "4",
+          "webContentLink": "https://drive.google.com/uc?id=1fk_rFdmKDardc7j8WJafhYjfXRV89kMd&export=download",
+          "webViewLink": "https://drive.google.com/file/d/1fk_rFdmKDardc7j8WJafhYjfXRV89kMd/view?usp=drivesdk",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/video/mp4",
+          "hasThumbnail": false,
+          "thumbnailVersion": "0",
+          "viewedByMe": false,
+          "createdTime": "2025-10-05T15:51:03.697Z",
+          "modifiedTime": "2025-10-05T15:51:04.901Z",
+          "modifiedByMeTime": "2025-10-05T15:51:04.901Z",
+          "modifiedByMe": true,
+          "owners": [
+            {
+              "kind": "drive#user",
+              "displayName": "Tech spotlight",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocJrm3BWqucX7Pw5FZXP4Hlj8GDSoW0R7JF-49TmIIi_U2THh_s=s64",
+              "me": true,
+              "permissionId": "01477432594213140972",
+              "emailAddress": "awesomehits76@gmail.com"
+            }
+          ],
+          "lastModifyingUser": {
+            "kind": "drive#user",
+            "displayName": "Tech spotlight",
+            "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocJrm3BWqucX7Pw5FZXP4Hlj8GDSoW0R7JF-49TmIIi_U2THh_s=s64",
+            "me": true,
+            "permissionId": "01477432594213140972",
+            "emailAddress": "awesomehits76@gmail.com"
+          },
+          "shared": false,
+          "ownedByMe": true,
+          "downloadRestrictions": {
+            "itemDownloadRestriction": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            },
+            "effectiveDownloadRestrictionWithContext": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            }
+          },
+          "capabilities": {
+            "canAcceptOwnership": false,
+            "canAddChildren": false,
+            "canAddMyDriveParent": false,
+            "canChangeCopyRequiresWriterPermission": true,
+            "canChangeItemDownloadRestriction": true,
+            "canChangeSecurityUpdateEnabled": false,
+            "canChangeViewersCanCopyContent": true,
+            "canComment": true,
+            "canCopy": true,
+            "canDelete": true,
+            "canDisableInheritedPermissions": false,
+            "canDownload": true,
+            "canEdit": true,
+            "canEnableInheritedPermissions": true,
+            "canListChildren": false,
+            "canModifyContent": true,
+            "canModifyContentRestriction": true,
+            "canModifyEditorContentRestriction": true,
+            "canModifyOwnerContentRestriction": true,
+            "canModifyLabels": false,
+            "canMoveChildrenWithinDrive": false,
+            "canMoveItemIntoTeamDrive": true,
+            "canMoveItemOutOfDrive": true,
+            "canMoveItemWithinDrive": true,
+            "canReadLabels": false,
+            "canReadRevisions": true,
+            "canRemoveChildren": false,
+            "canRemoveContentRestriction": false,
+            "canRemoveMyDriveParent": true,
+            "canRename": true,
+            "canShare": true,
+            "canTrash": true,
+            "canUntrash": true
+          },
+          "viewersCanCopyContent": true,
+          "copyRequiresWriterPermission": false,
+          "writersCanShare": true,
+          "permissions": [
+            {
+              "kind": "drive#permission",
+              "id": "01477432594213140972",
+              "type": "user",
+              "emailAddress": "awesomehits76@gmail.com",
+              "role": "owner",
+              "displayName": "awesomehits76",
+              "deleted": false,
+              "pendingOwner": false
+            }
+          ],
+          "permissionIds": [
+            "01477432594213140972"
+          ],
+          "originalFilename": "video file",
+          "fullFileExtension": "",
+          "fileExtension": "",
+          "md5Checksum": "f5b5733f4569be91e2f9b4c8cfc5cd0a",
+          "sha1Checksum": "99e6b93895af0f32317fd6c72813f70496005fa8",
+          "sha256Checksum": "33aa83b3ad7b9308bd240b47f6f828faeebc0d60ecb106cf400d2a6ca8d8577c",
+          "size": "770557",
+          "quotaBytesUsed": "770557",
+          "headRevisionId": "0B8JQKee9AAwrZmM4TTdPa0VWdzFqRTZSc0tMWmJYY2xhc1lZPQ",
+          "isAppAuthorized": true,
+          "linkShareMetadata": {
+            "securityUpdateEligible": false,
+            "securityUpdateEnabled": true
+          },
+          "inheritedPermissionsDisabled": false
+        }
+      }
+    ],
+    "Share file": [
+      {
+        "json": {
+          "kind": "drive#permission",
+          "id": "anyoneWithLink",
+          "type": "anyone",
+          "role": "reader",
+          "allowFileDiscovery": false
+        }
+      }
+    ],
+    "Share file1": [
+      {
+        "json": {
+          "kind": "drive#permission",
+          "id": "anyoneWithLink",
+          "type": "anyone",
+          "role": "reader",
+          "allowFileDiscovery": false
+        }
+      }
+    ],
+    "Code in JavaScript": [
+      {
+        "json": {
+          "videoUrl": "https://drive.google.com/uc?export=download&id=1fk_rFdmKDardc7j8WJafhYjfXRV89kMd"
+        }
+      }
+    ],
+    "Code in JavaScript1": [
+      {
+        "json": {
+          "imageUrl": "https://drive.google.com/uc?export=download&id=1u9Ku2a_HNbd3fwLA5-JcQ2M7GJrXmpW2"
+        }
+      }
+    ],
+    "Merge": [
+      {
+        "json": {
+          "videoUrl": "https://drive.google.com/uc?export=download&id=1fk_rFdmKDardc7j8WJafhYjfXRV89kMd",
+          "imageUrl": "https://drive.google.com/uc?export=download&id=1u9Ku2a_HNbd3fwLA5-JcQ2M7GJrXmpW2"
+        },
+        "binary": {}
+      }
+    ],
+    "Fal.ai - Wan 2.2": [
+      {
+        "json": {
+          "status": "IN_QUEUE",
+          "request_id": "48b9f9b0-7df2-465a-8f18-dfcb58792b1b",
+          "response_url": "https://queue.fal.run/fal-ai/wan/requests/48b9f9b0-7df2-465a-8f18-dfcb58792b1b",
+          "status_url": "https://queue.fal.run/fal-ai/wan/requests/48b9f9b0-7df2-465a-8f18-dfcb58792b1b/status",
+          "cancel_url": "https://queue.fal.run/fal-ai/wan/requests/48b9f9b0-7df2-465a-8f18-dfcb58792b1b/cancel",
+          "logs": null,
+          "metrics": {},
+          "queue_position": 0
+        }
+      }
+    ],
+    "Get Video Status": [
+      {
+        "json": {
+          "status": "COMPLETED",
+          "request_id": "48b9f9b0-7df2-465a-8f18-dfcb58792b1b",
+          "response_url": "https://queue.fal.run/fal-ai/wan/requests/48b9f9b0-7df2-465a-8f18-dfcb58792b1b",
+          "status_url": "https://queue.fal.run/fal-ai/wan/requests/48b9f9b0-7df2-465a-8f18-dfcb58792b1b/status",
+          "cancel_url": "https://queue.fal.run/fal-ai/wan/requests/48b9f9b0-7df2-465a-8f18-dfcb58792b1b/cancel",
+          "logs": null,
+          "metrics": {
+            "inference_time": 204.04946208000183
+          }
+        }
+      }
+    ],
+    "HTTP Request": [
+      {
+        "json": {
+          "video": {
+            "url": "https://v3b.fal.media/files/b/zebra/1YAJ7brLqc-C2aW_W4HU9_wan_animate_output.mp4",
+            "content_type": "application/octet-stream",
+            "file_name": "wan_animate_output.mp4",
+            "file_size": 608727
+          },
+          "prompt": "视频中的人在做动作",
+          "seed": 1014397391
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Form Submission": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Fal.ai - Wan 2.2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fal.ai - Wan 2.2": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Video Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video Status": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Share file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file1": {
+      "main": [
+        [
+          {
+            "node": "Share file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Share file": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Share file1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ed22039e-3d8d-47a3-9418-309e9003892b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "150a3ee1a023565209e7f7f988b89f1a1dccf72604c1039816143b38550f0710"
+  },
+  "id": "iO2L0dh6x7V491ZZ",
+  "tags": []
+}

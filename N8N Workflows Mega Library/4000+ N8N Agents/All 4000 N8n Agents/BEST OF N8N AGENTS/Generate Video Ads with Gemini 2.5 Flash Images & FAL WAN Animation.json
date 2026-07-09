@@ -1,0 +1,1993 @@
+{
+  "name": "generate ads from images",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/wan/v2.2-a14b/image-to-video",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\"image_url\":\"{{ $('Aggregate').item.json.data[0].data.url }}\",\"prompt\":\"{{ $('Set Storyboard Vars').first().json.i2v_prompt1 }}\",\"num_frames\":96,\"frames_per_second\":24,\"resolution\":\"480p\"}",
+        "options": {}
+      },
+      "id": "4154a5bd-8e86-4cbc-984d-9c23fb457f69",
+      "name": "FAL WAN i2v (Queue) 2",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        160,
+        704
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/wan/v2.2-a14b/image-to-video",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\"image_url\":\"{{ $('Aggregate').item.json.data[1].data.url }}\",\"prompt\":\"{{ $('Set Storyboard Vars').first().json.i2v_prompt2 }}\",\"num_frames\":96,\"frames_per_second\":24,\"resolution\":\"480p\"}",
+        "options": {}
+      },
+      "id": "798cba8a-49f6-4e0d-b463-6c36dc6e02f7",
+      "name": "FAL WAN i2v (Queue) 3",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        160,
+        896
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/wan/v2.2-a14b/image-to-video",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\"image_url\":\"{{ $('Aggregate').item.json.data[2].data.url }}\",\"prompt\":\"{{ $('Set Storyboard Vars').first().json.i2v_prompt3 }}\",\"num_frames\":96,\"frames_per_second\":24,\"resolution\":\"480p\"}",
+        "options": {}
+      },
+      "id": "18abf6f6-1306-47b0-9e0e-e67bb616806c",
+      "name": "FAL WAN i2v (Queue) 4",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        128,
+        1072
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/wan/v2.2-a14b/image-to-video",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\"image_url\":\"{{ $('Aggregate').item.json.data[3].data.url }}\",\"prompt\":\"{{ $('Set Storyboard Vars').first().json.i2v_prompt4 }}\",\"num_frames\":96,\"frames_per_second\":24,\"resolution\":\"480p\"}",
+        "options": {}
+      },
+      "id": "89bb37a1-c7c1-4331-9880-d82ccedef7f3",
+      "name": "FAL WAN i2v (Queue) 5",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        128,
+        1264
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "id": "245d8ed0-8499-4dda-91f3-c16b729606c6",
+      "name": "Wait i2v 2",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        336,
+        720
+      ],
+      "webhookId": "wan-i2v-wait-2",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "id": "b7b0f7c1-af0d-46ee-b98d-a13f01856d1e",
+      "name": "Wait i2v 3",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        336,
+        896
+      ],
+      "webhookId": "wan-i2v-wait-3",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "id": "c3b5e347-39b5-40eb-b80d-b9a69345caa2",
+      "name": "Wait i2v 4",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        336,
+        1072
+      ],
+      "webhookId": "wan-i2v-wait-4",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "id": "a3848a53-c9eb-4dc9-bdc9-46f089148e25",
+      "name": "Wait i2v 5",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        336,
+        1264
+      ],
+      "webhookId": "wan-i2v-wait-5",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/wan/requests/{{ $json.request_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "8a45489f-134b-46d5-a2b1-0a51670c449f",
+      "name": "FAL WAN i2v (Result) 2",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        896,
+        672
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/wan/requests/{{ $json.request_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "5945a8b9-feeb-41e5-a38f-bbb0e4a07a09",
+      "name": "FAL WAN i2v (Result) 3",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        896,
+        880
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/wan/requests/{{ $json.request_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "fb44749b-5154-4245-8662-662351fa2a6b",
+      "name": "FAL WAN i2v (Result) 4",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        896,
+        1056
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/wan/requests/{{ $json.request_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "7df1c573-dad7-42bf-aac2-6d6bebad5959",
+      "name": "FAL WAN i2v (Result) 5",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        896,
+        1232
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "animation-completed",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "COMPLETED"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b8feef13-571a-4735-9b1b-b2fcc3f8f2fe",
+      "name": "Animation Completed?2",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        656,
+        720
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "animation-completed",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "COMPLETED"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6f4d5d8e-083e-47ac-865a-be1128ccd980",
+      "name": "Animation Completed?3",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        656,
+        896
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "animation-completed",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "COMPLETED"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5c273027-c435-496c-81ff-e9e8cb96d492",
+      "name": "Animation Completed?4",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        656,
+        1072
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "animation-completed",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "COMPLETED"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ed689763-cd60-4b03-b6b4-72e624250352",
+      "name": "Animation Completed?5",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        656,
+        1264
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/wan/requests/{{ $json.request_id }}/status",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "b95bb906-8740-4e5c-9fa4-359af1174eee",
+      "name": "FAL WAN i2v (status)2",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        496,
+        720
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/wan/requests/{{ $json.request_id }}/status",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "585b4eed-167f-4de5-b69f-8229ce6eb2ae",
+      "name": "FAL WAN i2v (status)3",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        496,
+        896
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/wan/requests/{{ $json.request_id }}/status",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "e7488c78-0259-4ee9-ac9f-af6821b92a5e",
+      "name": "FAL WAN i2v (status)4",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        496,
+        1072
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/wan/requests/{{ $json.request_id }}/status",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "9502dd8b-218f-45c6-a64d-b8bed1e3d7c9",
+      "name": "FAL WAN i2v (status)5",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        496,
+        1264
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"title\": \"Pendulum, Shadow, and the Silent Lunar Mark\",\n  \"prompt1\": \"Vertical 9:16 top-down altar, matte black cloth; brass pendulum centered over minimalist star map of dots and thin lines; warm rim light; high contrast; no faces, no hands, no text, no letters, no numbers, no logos.\",\n  \"prompt2\": \"Vertical 9:16 macro side view; pendulum slows above a crescent metal cutout; precise shadow alignment on matte cloth; thin incense smoke; no faces, no hands, no text, no letters, no numbers, no logos.\",\n  \"prompt3\": \"Vertical 9:16 top-down; silver lunar talisman placed into the crescent cutout; shadow shape unchanged; clean composition; subtle micro-glitter specks; no faces, no hands, no text, no letters, no numbers, no logos.\",\n  \"prompt4\": \"Vertical 9:16 macro; candle off-frame flickers; highlight sweep across talisman; star map lines glint briefly; centered framing; no faces, no hands, no text, no letters, no numbers, no logos.\",\n  \"prompt5\": \"Vertical 9:16 top-down locked; pendulum fully still above talisman center; single glint travels once around edge then fades; pristine background; no faces, no hands, no text, no letters, no numbers, no logos.\",\n \"i2v_prompt1\": \"Animate frame 1 with gentle parallax and light sweep; may describe camera path/motion cues; preserve product/brand; no morphing; 9:16; ~4s; 24fps\",\n  \"i2v_prompt2\": \"Animate frame 2 (edit of frame 1): subtle motion consistent with the stated change (e.g., slight yaw/push‑in, highlight roll); preserve product; no morphing; 9:16; ~4s; 24fps\",\n  \"i2v_prompt3\": \"Animate frame 3 (edit of frame 2): continue the narrative motion (e.g., controlled tilt/glint/reveal); preserve product; no morphing; 9:16; ~4s; 24fps\",\n  \"i2v_prompt4\": \"Animate frame 4 (edit of frame 3): finishing move (e.g., short arc or glint wrap) into a clean hold; preserve product; no morphing; 9:16; ~4s; 24fps\",\n  \"environment\": \"Candlelit altar, matte black cloth, high contrast, thin incense smoke.\",\n  \"sound\": \"Soft candle crackle, faint ticking, distant single chime.\"\n}"
+      },
+      "id": "933a26f9-e475-40ae-a9dc-66b24411807f",
+      "name": "Structured Output Parser2",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        -2160,
+        1024
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {},
+      "id": "a9cc34a7-bc48-4375-a1b6-afb2d92c6fe2",
+      "name": "Think2",
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "position": [
+        -2304,
+        1040
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "id": "fb0f8187-850e-4654-b671-0b1daab179c6",
+      "name": "Merge1",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        1136,
+        784
+      ],
+      "typeVersion": 3.1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "==Use this product description:\n\n{{ $json[\"Product description\"] }}\n\nCreate a simple, elegant 4-frame visual story for a premium advertisement video. Focus on SIMPLE edits and SUBTLE animations that work well with AI image-to-video models.\n\nYour task:\n1. Design 4 independent SIMPLE edits of the SAME original product image\n2. Each edit should be minimal: lighting changes, background blur, simple color grading, or subtle effects\n3. Animations must be VERY SIMPLE: camera movements, rotations, zoom, or gentle lighting changes\n4. Make it suitable for social media with clean, professional look\n\nFor the product context, consider:\n- Clean, minimal edits that enhance the product\n- Simple lighting improvements\n- Subtle background changes (blur, color, gradient)\n- Easy camera movements for animation\n\nReturn ONLY a compact JSON with these keys (no prose):\n{\n  \"title\": \"<≤60 chars, catchy title that hooks viewers immediately>\",\n  \"prompt1\": \"<Simple edit: Enhance lighting and add subtle background blur - vertical 9:16, clean look>\",\n  \"prompt2\": \"<Simple edit: Change background to elegant gradient or solid color - maintain product focus>\",\n  \"prompt3\": \"<Simple edit: Add warm cinematic lighting with soft shadows - premium feel>\",\n  \"prompt4\": \"<Simple edit: Create depth with bokeh background and highlight the product - hero shot>\",\n  \"i2v_prompt1\": \"Gentle 360-degree rotation of the product, smooth and slow; 9:16; 5s\",\n  \"i2v_prompt2\": \"Slow camera push-in towards the product, steady movement; 9:16; 5s\", \n  \"i2v_prompt3\": \"Subtle lighting sweep across the product surface, gentle glow; 9:16; 5s\",\n  \"i2v_prompt4\": \"Slow camera orbit around the product, elegant reveal; 9:16; 5s\",\n  \"environment\": \"<≤25 words: clean, minimalist setting that enhances product appeal>\",\n  \"sound\": \"<≤20 words: modern, clean music with premium feel - suitable for luxury brand advertisement>\"\n}\n\nRules:\n• Keep ALL edits VERY SIMPLE - only lighting, background, or subtle color changes\n• Animations must be BASIC camera movements only (rotate, zoom, orbit, push-in)\n• NO complex effects, morphing, or dramatic changes\n• Each edit should enhance the SAME product without changing its core appearance\n• Focus on clean, professional aesthetics\n• Preserve product authenticity and visual identity\n• Language must follow input description language\n• Output must be strictly valid JSON",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Role: You are a creative director specialized in short-form viral ads. You will produce a 4-frame visual story (vertical 9:16) and four matching animation prompts. The goal is a funny, curious, or satisfying mini-story that makes the product memorable.\n\nStorytelling rules:\n\n- The output ALWAYS in English\n- Preserve the product's appearance (shape, materials, logo) across all frames.\n- No new primary objects, no hands, no faces, no on-screen text/UI.\n- Background and lighting must remain consistent, only changing if it's part of the story (e.g., a light turns on).\n- Output strictly valid compact JSON, no prose, no markdown.\n\nLanguage: Follow the input description’s language (ES/EN)."
+        }
+      },
+      "id": "1203d371-74b4-4852-ad48-25d1c605c5b3",
+      "name": "Storyboard Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -2432,
+        784
+      ],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "603206a7-a63d-4fc1-8771-f5e6581b6b64",
+              "name": "title",
+              "type": "string",
+              "value": "={{ $json.output.title }}"
+            },
+            {
+              "id": "13789e95-b7c3-4952-afaa-5b86e212b225",
+              "name": "prompt1",
+              "type": "string",
+              "value": "={{ $json.output.prompt1 }}"
+            },
+            {
+              "id": "fb657b62-be6f-4d12-a2e5-884862394515",
+              "name": "prompt2",
+              "type": "string",
+              "value": "={{ $json.output.prompt2 }}"
+            },
+            {
+              "id": "90c41c48-b79d-4fde-aff6-7fbdcb287526",
+              "name": "prompt3",
+              "type": "string",
+              "value": "={{ $json.output.prompt3 }}"
+            },
+            {
+              "id": "74fca959-7fb8-4578-b98d-a9910f622845",
+              "name": "prompt4",
+              "type": "string",
+              "value": "={{ $json.output.prompt4 }}"
+            },
+            {
+              "id": "3257de17-c23a-4378-83d0-3583cd2662f7",
+              "name": "i2v_prompt1",
+              "type": "string",
+              "value": "={{ $json.output.i2v_prompt1 }}"
+            },
+            {
+              "id": "7b07631e-fbbe-40c3-a2cf-1d567a1338b0",
+              "name": "i2v_prompt2",
+              "type": "string",
+              "value": "={{ $json.output.i2v_prompt2 }}"
+            },
+            {
+              "id": "43beff27-abd0-40cf-8040-eefdab3829f3",
+              "name": "i2v_prompt3",
+              "type": "string",
+              "value": "={{ $json.output.i2v_prompt3 }}"
+            },
+            {
+              "id": "2b68fbbe-1800-4ecc-ba45-7ae281c477e0",
+              "name": "i2v_prompt4",
+              "type": "string",
+              "value": "={{ $json.output.i2v_prompt4 }}"
+            },
+            {
+              "id": "15224724-31ad-4fda-a812-f5b7b9593342",
+              "name": "environment",
+              "type": "string",
+              "value": "={{ $json.output.environment }}"
+            },
+            {
+              "id": "fbceb288-b55b-4c1d-828f-e47f66c6fa23",
+              "name": "sound",
+              "type": "string",
+              "value": "={{ $json.output.sound }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c50ab3b2-c9a7-40f2-97a6-638e32b1e5df",
+      "name": "Set Storyboard Vars",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -2000,
+        784
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://fal.run/fal-ai/gemini-25-flash-image/edit",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\"prompt\":\"{{ $('Set Storyboard Vars').item.json.prompt1 }}\",\"image_urls\":[\"{{ $('Upload Original Image to imgbb').item.json.data.url }}\"],\"num_images\":{{ $('Set APIs Vars').item.json.number_of_images }}}",
+        "options": {}
+      },
+      "id": "16ff8c5d-f9b3-48f3-abb8-d48dd4ff9812",
+      "name": "Gemini 2.5 Flash - Generate Image 2",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -1168,
+        720
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "images",
+        "options": {}
+      },
+      "id": "ccf8e3e3-382d-4c66-9854-a011e07cb15a",
+      "name": "Separate Image Outputs 2",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        -944,
+        720
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map((i)=>({json:{url: i.json.url},binary:{photo2:i.binary.data}}));"
+      },
+      "id": "f13c4b4b-84f1-4131-bc33-5f846dcdfdfa",
+      "name": "Rename to photo 2",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -512,
+        720
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.imgbb.com/1/upload",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "photo2"
+            },
+            {
+              "name": "key",
+              "value": "={{ $('Set APIs Vars').item.json.imgbb_api_key }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "28d13812-f1a5-458d-9c99-2078a7c2bf16",
+      "name": "Upload Image to imgbb 2",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -320,
+        720
+      ],
+      "retryOnFail": true,
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://fal.run/fal-ai/gemini-25-flash-image/edit",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\"prompt\":\"{{ $('Set Storyboard Vars').item.json.prompt2 }}\",\"image_urls\":[\"{{ $('Upload Original Image to imgbb').item.json.data.url }}\"],\"num_images\":{{ $('Set APIs Vars').item.json.number_of_images }}}",
+        "options": {}
+      },
+      "id": "a0f56765-9fe0-4ea3-955d-667b12a04e1d",
+      "name": "Gemini 2.5 Flash - Generate Image 3",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -1168,
+        896
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "images",
+        "options": {}
+      },
+      "id": "0f154316-be26-4097-8c96-cfbaa2d6b64d",
+      "name": "Separate Image Outputs 3",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        -944,
+        896
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map((i)=>({json:{url: i.json.url},binary:{photo3:i.binary.data}}));"
+      },
+      "id": "cfa827ce-35c0-4f24-a799-b31e36c35b15",
+      "name": "Rename to photo 3",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -496,
+        896
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.imgbb.com/1/upload",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "photo3"
+            },
+            {
+              "name": "key",
+              "value": "={{ $('Set APIs Vars').item.json.imgbb_api_key }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2ed5d878-6f72-441a-a7ab-3d150bd3c65c",
+      "name": "Upload Image to imgbb 3",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -320,
+        896
+      ],
+      "retryOnFail": true,
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://fal.run/fal-ai/gemini-25-flash-image/edit",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\"prompt\":\"{{ $('Set Storyboard Vars').item.json.prompt3 }}\",\"image_urls\":[\"{{ $('Upload Original Image to imgbb').item.json.data.url }}\"],\"num_images\":{{ $('Set APIs Vars').item.json.number_of_images }}}",
+        "options": {}
+      },
+      "id": "2b208e39-5c38-4f45-b7b3-acb31f29de2f",
+      "name": "Gemini 2.5 Flash - Generate Image 4",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -1168,
+        1072
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "images",
+        "options": {}
+      },
+      "id": "1db851fd-72cd-43ae-97d5-140be7f494a9",
+      "name": "Separate Image Outputs 4",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        -944,
+        1072
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map((i)=>({json:{url: i.json.url},binary:{photo4:i.binary.data}}));"
+      },
+      "id": "4f9eca14-18a7-46ba-adb6-eb65aefbf9f3",
+      "name": "Rename to photo 4",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -512,
+        1072
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.imgbb.com/1/upload",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "photo4"
+            },
+            {
+              "name": "key",
+              "value": "={{ $('Set APIs Vars').item.json.imgbb_api_key }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "53cebe50-ff41-40ee-b67b-67970b81d83a",
+      "name": "Upload Image to imgbb 4",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -320,
+        1072
+      ],
+      "retryOnFail": true,
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://fal.run/fal-ai/gemini-25-flash-image/edit",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\"prompt\":\"{{ $('Set Storyboard Vars').item.json.prompt4 }}\",\"image_urls\":[\"{{ $('Upload Original Image to imgbb').item.json.data.url }}\"],\"num_images\":{{ $('Set APIs Vars').item.json.number_of_images }}}",
+        "options": {}
+      },
+      "id": "92746160-5b96-4f4d-9d39-c633a30f9144",
+      "name": "Gemini 2.5 Flash - Generate Image 5",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -1168,
+        1216
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "images",
+        "options": {}
+      },
+      "id": "497608c8-32b1-49f6-ae4e-06f352085d98",
+      "name": "Separate Image Outputs 5",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        -944,
+        1216
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map((i)=>({json:{url: i.json.url},binary:{photo5:i.binary.data}}));"
+      },
+      "id": "1ac30539-ef71-4fd9-8404-8635c9eeb4aa",
+      "name": "Rename to photo 5",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -528,
+        1216
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.imgbb.com/1/upload",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "photo5"
+            },
+            {
+              "name": "key",
+              "value": "={{ $('Set APIs Vars').item.json.imgbb_api_key }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "feecb89f-b80e-4453-a928-5da4946074a3",
+      "name": "Upload Image to imgbb 5",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -320,
+        1216
+      ],
+      "retryOnFail": true,
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/ffmpeg-api/compose",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\"tracks\":[{\"id\":\"v1\",\"type\":\"video\",\"keyframes\":[{\"url\":\"{{ $json.data[0].video.url }}\",\"timestamp\":0,\"duration\":5},{\"url\":\"{{ $json.data[1].video.url }}\",\"timestamp\":5,\"duration\":5},{\"url\":\"{{ $json.data[2].video.url }}\",\"timestamp\":10,\"duration\":5},{\"url\":\"{{ $('FAL WAN i2v (Result) 5').item.json.video.url }}\",\"timestamp\":15,\"duration\":5}]}]}",
+        "options": {}
+      },
+      "id": "1acb7d27-8697-4185-a3d9-408fe5eac8c6",
+      "name": "Sequence Video (FFmpeg)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1456,
+        816
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "amount": 200
+      },
+      "id": "2e988406-899f-462f-9228-95cba7391ed6",
+      "name": "Wait Final Video",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        1648,
+        816
+      ],
+      "webhookId": "compose-wait",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.response_url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "3391641a-03ed-4754-ad19-5f7fdcaafbea",
+      "name": "Get Final Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1776,
+        816
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/mmaudio-v2",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\"prompt\":\"Ambient suitable for a product ad. {{ $('Set Storyboard Vars').first().json.sound }}\",\"duration\":20,\"video_url\":\"{{ $json.video_url || $json.data?.video_url || $json.output_url || $json.data?.output_url }}\"}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 2000
+            }
+          }
+        }
+      },
+      "id": "3ec4a0a4-78c2-4c5d-8195-19fb52e351fa",
+      "name": "Create Sounds",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1936,
+        816
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "amount": 200
+      },
+      "id": "1b624576-ebc0-4cfd-9076-dd0b9d429606",
+      "name": "Wait for Sounds",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        2144,
+        816
+      ],
+      "webhookId": "audio-wait",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/mmaudio-v2/requests/{{ $json.request_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "053981a1-5cba-4987-b046-de9c9c890904",
+      "name": "Get Sounds",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2336,
+        816
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.video.url }}",
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "id": "0b7cd740-5105-422a-bfb8-bc3ce910467e",
+      "name": "Download Final Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2560,
+        816
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "id": "516969e2-943a-4858-95d1-567cbb36d348",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        -144,
+        784
+      ],
+      "typeVersion": 3.1
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "aff0841e-8e4b-4dc1-aeca-17506ee659b3",
+      "name": "Aggregate",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        -32,
+        816
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "e8401ca0-953b-4ede-8cb0-32d864e545ba",
+      "name": "Aggregate1",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        1280,
+        816
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "path": "generate-ad",
+        "formTitle": "Generate ads",
+        "formDescription": "Upload photo and descriptipon",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "photo",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Product description",
+              "fieldType": "textarea",
+              "placeholder": "Describe the product"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "016a4396-b574-4e1e-af9e-4ecad7d603a0",
+      "name": "Photo Upload Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        -2832,
+        704
+      ],
+      "webhookId": "animate-photo-form",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "65f5780e-7894-4d4c-b1d7-b6b922aceebe",
+              "name": "number_of_images",
+              "type": "number",
+              "value": 1
+            },
+            {
+              "id": "e6d64db7-8c79-4f8f-96bf-edbc1faa365d",
+              "name": "size_of_image",
+              "type": "string",
+              "value": "1024x1024"
+            },
+            {
+              "id": "5614f0f0-92d2-4a42-98a7-401f43308b55",
+              "name": "openai_image_model",
+              "type": "string",
+              "value": "gemini-25-flash-image"
+            },
+            {
+              "id": "9ab52e7d-a777-4857-96bd-ae9e06317e54",
+              "name": "format_image",
+              "type": "string",
+              "value": "webp"
+            },
+            {
+              "id": "a7d62af0-baf3-4349-abe9-a75b91edc3f2",
+              "name": "imgbb_api_key",
+              "type": "string",
+              "value": "add_api_token"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5df194f7-0aae-4bed-aff7-8f93573fb91a",
+      "name": "Set APIs Vars",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1792,
+        784
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "1bcd85ab-6cd7-4450-bbff-e545701f7f1f",
+      "name": "Merge Vars + Photo1",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        -1584,
+        720
+      ],
+      "typeVersion": 3.1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.imgbb.com/1/upload",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "photo"
+            },
+            {
+              "name": "key",
+              "value": "={{ $('Set APIs Vars').item.json.imgbb_api_key }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8de4430c-ea78-4db8-9c23-a49f12d49f3a",
+      "name": "Upload Original Image to imgbb",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -1392,
+        720
+      ],
+      "retryOnFail": true,
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "id": "3ab422fd-2a4a-4219-8984-7159ce7ca555",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "position": [
+        -2400,
+        992
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Separate Image Outputs 2').item.json.url }}",
+        "options": {}
+      },
+      "id": "b48ae7a9-b3f2-46f5-a407-0f937cb8c79d",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -672,
+        720
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Separate Image Outputs 3').item.json.url }}",
+        "options": {}
+      },
+      "id": "3288f3d3-c329-4517-a8ac-ea58e2eb7bd2",
+      "name": "HTTP Request1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -672,
+        896
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Separate Image Outputs 4').item.json.url }}",
+        "options": {}
+      },
+      "id": "fd03538f-857e-41f3-b9bc-7e8e98fdf3e3",
+      "name": "HTTP Request2",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -688,
+        1072
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Separate Image Outputs 5').item.json.url }}",
+        "options": {}
+      },
+      "id": "cca0ae46-e73d-41c9-9f20-f8761e1011e5",
+      "name": "HTTP Request3",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -704,
+        1216
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "resource": "uploads",
+        "operation": "uploadVideo"
+      },
+      "id": "667a22d3-d60c-44b2-a3c3-64290db8efd3",
+      "name": "Upload Post",
+      "type": "n8n-nodes-preview-upload-post.uploadPost",
+      "position": [
+        2768,
+        816
+      ],
+      "typeVersion": 1,
+      "credentials": {}
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think2": {
+      "ai_tool": [
+        [
+          {
+            "node": "Storyboard Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "FAL WAN i2v (Queue) 2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "FAL WAN i2v (Queue) 3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "FAL WAN i2v (Queue) 4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "FAL WAN i2v (Queue) 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate1": {
+      "main": [
+        [
+          {
+            "node": "Sequence Video (FFmpeg)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Sounds": {
+      "main": [
+        [
+          {
+            "node": "Download Final Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait i2v 2": {
+      "main": [
+        [
+          {
+            "node": "FAL WAN i2v (status)2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait i2v 3": {
+      "main": [
+        [
+          {
+            "node": "FAL WAN i2v (status)3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait i2v 4": {
+      "main": [
+        [
+          {
+            "node": "FAL WAN i2v (status)4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait i2v 5": {
+      "main": [
+        [
+          {
+            "node": "FAL WAN i2v (status)5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Rename to photo 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Sounds": {
+      "main": [
+        [
+          {
+            "node": "Wait for Sounds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Rename to photo 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Rename to photo 4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Rename to photo 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set APIs Vars": {
+      "main": [
+        [
+          {
+            "node": "Merge Vars + Photo1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get Final Video": {
+      "main": [
+        [
+          {
+            "node": "Create Sounds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Sounds": {
+      "main": [
+        [
+          {
+            "node": "Get Sounds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Storyboard Agent": {
+      "main": [
+        [
+          {
+            "node": "Set Storyboard Vars",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Final Video": {
+      "main": [
+        [
+          {
+            "node": "Get Final Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Photo Upload Form": {
+      "main": [
+        [
+          {
+            "node": "Merge Vars + Photo1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Storyboard Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename to photo 2": {
+      "main": [
+        [
+          {
+            "node": "Upload Image to imgbb 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename to photo 3": {
+      "main": [
+        [
+          {
+            "node": "Upload Image to imgbb 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename to photo 4": {
+      "main": [
+        [
+          {
+            "node": "Upload Image to imgbb 4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename to photo 5": {
+      "main": [
+        [
+          {
+            "node": "Upload Image to imgbb 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Vars + Photo1": {
+      "main": [
+        [
+          {
+            "node": "Upload Original Image to imgbb",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Storyboard Vars": {
+      "main": [
+        [
+          {
+            "node": "Set APIs Vars",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Final Video": {
+      "main": [
+        [
+          {
+            "node": "Upload Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Animation Completed?2": {
+      "main": [
+        [
+          {
+            "node": "FAL WAN i2v (Result) 2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "FAL WAN i2v (Queue) 3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait i2v 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Animation Completed?3": {
+      "main": [
+        [
+          {
+            "node": "FAL WAN i2v (Result) 3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "FAL WAN i2v (Queue) 4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait i2v 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Animation Completed?4": {
+      "main": [
+        [
+          {
+            "node": "FAL WAN i2v (Result) 4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "FAL WAN i2v (Queue) 5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait i2v 4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Animation Completed?5": {
+      "main": [
+        [
+          {
+            "node": "FAL WAN i2v (Result) 5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait i2v 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAL WAN i2v (Queue) 2": {
+      "main": [
+        [
+          {
+            "node": "Wait i2v 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAL WAN i2v (Queue) 3": {
+      "main": [
+        [
+          {
+            "node": "Wait i2v 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAL WAN i2v (Queue) 4": {
+      "main": [
+        [
+          {
+            "node": "Wait i2v 4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAL WAN i2v (Queue) 5": {
+      "main": [
+        [
+          {
+            "node": "Wait i2v 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAL WAN i2v (status)2": {
+      "main": [
+        [
+          {
+            "node": "Animation Completed?2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAL WAN i2v (status)3": {
+      "main": [
+        [
+          {
+            "node": "Animation Completed?3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAL WAN i2v (status)4": {
+      "main": [
+        [
+          {
+            "node": "Animation Completed?4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAL WAN i2v (status)5": {
+      "main": [
+        [
+          {
+            "node": "Animation Completed?5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAL WAN i2v (Result) 2": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAL WAN i2v (Result) 3": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "FAL WAN i2v (Result) 4": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "FAL WAN i2v (Result) 5": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Sequence Video (FFmpeg)": {
+      "main": [
+        [
+          {
+            "node": "Wait Final Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Image to imgbb 2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Image to imgbb 3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Upload Image to imgbb 4": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Upload Image to imgbb 5": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Storyboard Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separate Image Outputs 2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separate Image Outputs 3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separate Image Outputs 4": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separate Image Outputs 5": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Storyboard Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Original Image to imgbb": {
+      "main": [
+        [
+          {
+            "node": "Gemini 2.5 Flash - Generate Image 2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gemini 2.5 Flash - Generate Image 3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gemini 2.5 Flash - Generate Image 4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gemini 2.5 Flash - Generate Image 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 2.5 Flash - Generate Image 2": {
+      "main": [
+        [
+          {
+            "node": "Separate Image Outputs 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 2.5 Flash - Generate Image 3": {
+      "main": [
+        [
+          {
+            "node": "Separate Image Outputs 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 2.5 Flash - Generate Image 4": {
+      "main": [
+        [
+          {
+            "node": "Separate Image Outputs 4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 2.5 Flash - Generate Image 5": {
+      "main": [
+        [
+          {
+            "node": "Separate Image Outputs 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cd064606110cd556c28b75944cc984cddb10bbdd63deca196ea4cb4095990bc2"
+  },
+  "tags": []
+}

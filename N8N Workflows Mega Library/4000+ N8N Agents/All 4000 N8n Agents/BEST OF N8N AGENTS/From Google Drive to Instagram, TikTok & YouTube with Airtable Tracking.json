@@ -1,0 +1,961 @@
+{
+  "name": "From Google Drive to Instagram, TikTok & YouTube with Airtable Tracking",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cd270863-aa35-418c-a0ae-1b5878eee2ed",
+              "name": "airtable_app_id",
+              "type": "string",
+              "value": "add_airtable_app_id"
+            },
+            {
+              "id": "00ef91b2-8a4c-42bb-a46f-f7eb06e861e8",
+              "name": "airtable_table_id",
+              "type": "string",
+              "value": "add_airtable_table_id"
+            },
+            {
+              "id": "21b5d3ad-ff81-407e-8c4e-53bda8a16e0e",
+              "name": "upload_post_user",
+              "type": "string",
+              "value": "test2"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "92204bee-65f7-44e8-b18e-5c8ed2421d13",
+      "name": "Set Variables",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        3184,
+        2160
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "mode": "list",
+          "value": "18m0i341QLQuyWuHv_FBdz8-r-QDtofYm",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/18m0i341QLQuyWuHv_FBdz8-r-QDtofYm",
+          "cachedResultName": "Influencersde"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "id": "970d8d7d-edbe-4ba1-82b6-1b74c51f3786",
+      "name": "Google Drive Trigger",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "position": [
+        1792,
+        2160
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "",
+          "value": "={{ $json.id || $json.data[0].id }}"
+        },
+        "options": {}
+      },
+      "id": "22b20fee-2a3a-40d4-aee9-da17716b0cf2",
+      "name": "Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        1952,
+        2160
+      ],
+      "retryOnFail": true,
+      "typeVersion": 1,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "authentication": "airtableTokenApi",
+        "operation": "append",
+        "application": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Set Variables').item.json.airtable_app_id }}"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Set Variables').item.json.airtable_table_id }}"
+        },
+        "addAllFields": false,
+        "fields": [
+          "Video Name"
+        ],
+        "options": {}
+      },
+      "id": "684b861e-ecc4-4c53-a6df-eeb952ad11c3",
+      "name": "Create Airtable Record",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        3392,
+        2160
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "id": "cc543961-7d41-4be7-9234-c3e892b0f0d2",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "position": [
+        2288,
+        2496
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "text": "=🔔 ERROR SUBIENDO VIDEOS",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "1027a61c-91cf-4120-bedc-4724aeffc199",
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        2624,
+        2480
+      ],
+      "webhookId": "f6729386-9905-45f1-800f-4fe01a06ac9c",
+      "retryOnFail": true,
+      "typeVersion": 1.2,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 1,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "9fadb3fd-2547-42bd-8f40-f410a97dcf57",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              },
+              "leftValue": "={{ $json.trigger.error.message }}",
+              "rightValue": "The DNS server returned an error, perhaps the server is offline"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6bbd4c04-4cd2-4904-8c34-5e6a278c13f9",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        2432,
+        2496
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "content": "## Description\nThis automation allows you to upload a video to a configured Google Drive folder, and it will automatically create descriptions and upload it to Instagram, TikTok, and YouTube with Airtable tracking.\n\n## How to Use\n1. Configure your Airtable base and table IDs in the Set Variables node\n2. Set up Airtable fields: Video Name, Google Drive Link, File ID, Instagram Status, TikTok Status, YouTube Status, Upload Date, Description\n3. Generate an API token at upload-post.com and add to Upload nodes\n4. Configure your Google Drive folder\n5. Customize the OpenAI prompt for your specific use case\n6. Optional: Configure Telegram for error notifications\n\n## Requirements\n- Airtable account with configured base\n- upload-post.com account\n- Google Drive account\n- OpenAI API key\n",
+        "height": 300,
+        "width": 860
+      },
+      "id": "eacb869f-175a-4901-85ec-ead69c532c55",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1440,
+        1808
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "id": "1dd9bcae-81d9-4687-9e79-ecdf8b0bd012",
+      "name": "Get Audio from Video",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        2592,
+        2160
+      ],
+      "notesInFlow": true,
+      "retryOnFail": true,
+      "typeVersion": 1,
+      "waitBetweenTries": 5000,
+      "notes": "Extract the audio from video for generate the description"
+    },
+    {
+      "parameters": {
+        "fileName": "={{ $json.originalFilename.replaceAll(\" \", \"_\") }}",
+        "options": {}
+      },
+      "id": "2e495a37-8a7e-4af5-b7dd-5e7a1649f361",
+      "name": "Read video from Google Drive",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "position": [
+        2160,
+        2160
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are an expert assistant in creating engaging social media video titles.",
+              "role": "system"
+            },
+            {
+              "content": "=I'm going to upload a video to social media. Here are some examples of descriptions that have worked well on Instagram:\n\nFollow and save for later. Discover InfluencersDe, the AI tool that automates TikTok creation and publishing to drive traffic to your website. Perfect for entrepreneurs and brands.\n#digitalmarketing #ugc #tiktok #ai #influencersde #contentcreation\n\nDiscover the video marketing revolution with InfluencersDe!\n.\n.\n.\n#socialmedia #videomarketing #ai #tiktok #influencersde #growthhacking\n\nDon't miss InfluencersDe, the tool that transforms your marketing strategy with just one click!\n.\n.\n.\n#ugc #ai #tiktok #digitalmarketing #influencersde #branding\n\nCan you create another title for the Instagram post based on this recognized audio from the video?\n\nAudio: {{ $('Get Audio from Video').item.json.text }}\n\nIMPORTANT: Reply only with the description, don't add anything else."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dbd516db-bfcd-4e9c-9485-b448f1cb7a04",
+      "name": "Generate Description for Videos",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        2800,
+        2160
+      ],
+      "notesInFlow": true,
+      "retryOnFail": true,
+      "typeVersion": 1.4,
+      "waitBetweenTries": 5000,
+      "notes": "Request to OpenAi for generate description with the audio extracted from the video"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableTokenApi",
+        "operation": "update",
+        "application": {
+          "__rl": true,
+          "mode": "",
+          "value": "={{ $('Set Variables').item.json.airtable_app_id }}"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "",
+          "value": "={{ $('Set Variables').item.json.airtable_table_id }}"
+        },
+        "id": "={{ $('Create Airtable Record').item.json.id }}",
+        "updateAllFields": false,
+        "fields": [
+          "Description",
+          "Video Name",
+          "Google Drive Links",
+          "Upload Date"
+        ],
+        "options": {}
+      },
+      "id": "202a4aed-0903-414f-b1f2-1ec8be6f05f8",
+      "name": "Update Airtable with Description",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        3760,
+        2160
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "filePath": "={{ $('Read video from Google Drive').item.json.originalFilename.replaceAll(\" \", \"_\") }}",
+        "dataPropertyName": "datavideo"
+      },
+      "id": "5568ddf4-64c8-48f1-98d9-3e6e9ca8f3f1",
+      "name": "Read Video for TikTok",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "position": [
+        4288,
+        1920
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "filePath": "={{ $('Read video from Google Drive').item.json.originalFilename.replaceAll(\" \", \"_\") }}",
+        "dataPropertyName": "datavideo"
+      },
+      "id": "fbc927f2-92d4-4019-8603-307572e78e5a",
+      "name": "Read Video for Instagram",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "position": [
+        4272,
+        2208
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "filePath": "={{ $('Read video from Google Drive').item.json.originalFilename.replaceAll(\" \", \"_\") }}",
+        "dataPropertyName": "datavideo"
+      },
+      "id": "a14c0b1d-dad4-4aa3-8571-a3e7f46fdb09",
+      "name": "Read Video for YouTube",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "position": [
+        4272,
+        2480
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.upload-post.com/api/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{ $('Generate Description for Videos').item.json.message.content.replaceAll(\"\\\"\", \"\") }}"
+            },
+            {
+              "name": "platform[]",
+              "value": "tiktok"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "video",
+              "inputDataFieldName": "datavideo"
+            },
+            {
+              "name": "user",
+              "value": "={{ $('Set Variables').item.json.upload_post_user }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fac534dc-2883-46a1-bd07-46ae08900a7d",
+      "name": "Upload Video to TikTok",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        4528,
+        1920
+      ],
+      "notesInFlow": true,
+      "typeVersion": 4.2,
+      "notes": "Generate in upload-post.com the token and add to the credentials in the header-> Authorization: Apikey (token here)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.upload-post.com/api/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{ $('Generate Description for Videos').item.json.message.content.replaceAll(\"\\\"\", \"\") }}"
+            },
+            {
+              "name": "platform[]",
+              "value": "instagram"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "video",
+              "inputDataFieldName": "datavideo"
+            },
+            {
+              "name": "user",
+              "value": "={{ $('Set Variables').item.json.upload_post_user }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4f1356c2-83ea-4a5e-940c-13a92ec39f82",
+      "name": "Upload Video to Instagram",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        4528,
+        2208
+      ],
+      "notesInFlow": true,
+      "typeVersion": 4.2,
+      "notes": "Generate in upload-post.com the token and add to the credentials in the header-> Authorization: Apikey (token here)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.upload-post.com/api/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{ $('Generate Description for Videos').item.json.message.content.replaceAll(\"\\\"\", \"\").substring(0, 70) }}\n"
+            },
+            {
+              "name": "platform[]",
+              "value": "youtube"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "video",
+              "inputDataFieldName": "datavideo"
+            },
+            {
+              "name": "user",
+              "value": "={{ $('Set Variables').item.json.upload_post_user }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9f324e2e-b3dc-48fd-a8f4-93200255c94f",
+      "name": "Upload Video to YouTube",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        4528,
+        2480
+      ],
+      "notesInFlow": true,
+      "typeVersion": 4.2,
+      "notes": "Generate in upload-post.com the token and add to the credentials in the header-> Authorization: Apikey (token here)"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableTokenApi",
+        "operation": "update",
+        "application": {
+          "__rl": true,
+          "mode": "",
+          "value": "={{ $('Set Variables').item.json.airtable_app_id }}"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "",
+          "value": "={{ $('Set Variables').item.json.airtable_table_id }}"
+        },
+        "id": "={{ $('Create Airtable Record').item.json.id }}",
+        "updateAllFields": false,
+        "fields": [
+          "YouTube Status",
+          "Youtube URL"
+        ],
+        "options": {}
+      },
+      "id": "c1db56af-14c4-4166-8659-312ea5214410",
+      "name": "Update YouTube Status - Success",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        4992,
+        2480
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "authentication": "airtableTokenApi",
+        "operation": "update",
+        "application": {
+          "__rl": true,
+          "mode": "",
+          "value": "={{ $('Set Variables').item.json.airtable_app_id }}"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "",
+          "value": "={{ $('Set Variables').item.json.airtable_table_id }}"
+        },
+        "id": "={{ $('Create Airtable Record').item.json.id }}",
+        "updateAllFields": false,
+        "fields": [
+          "TikTok Status",
+          "Tiktok URL"
+        ],
+        "options": {}
+      },
+      "id": "4865e83c-4da3-478f-b1fe-c67d0da2fdf9",
+      "name": "Update TikTok Status",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        4992,
+        1920
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "authentication": "airtableTokenApi",
+        "operation": "update",
+        "application": {
+          "__rl": true,
+          "mode": "",
+          "value": "={{ $('Set Variables').item.json.airtable_app_id }}"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "",
+          "value": "={{ $('Set Variables').item.json.airtable_table_id }}"
+        },
+        "id": "={{ $('Create Airtable Record').item.json.id }}",
+        "updateAllFields": false,
+        "fields": [
+          "Instagram Status",
+          "Instagram URL"
+        ],
+        "options": {}
+      },
+      "id": "1faea311-66d6-4b37-95da-f662f0fae773",
+      "name": "Update Instagram Status",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        4992,
+        2208
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e611aba1-e55c-4221-b03b-04008a04fa9c",
+              "name": "ID",
+              "type": "string",
+              "value": "={{ $('Update Airtable with Description').item.json.id }}"
+            },
+            {
+              "id": "47f61cd2-6dd6-4714-b772-3e0537accecd",
+              "name": "TikTok Status",
+              "type": "string",
+              "value": "=success: {{ $json.results.tiktok.success }}"
+            },
+            {
+              "id": "12829ca5-2780-4779-be0c-ff1712c012d8",
+              "name": "Tiktok URL",
+              "type": "string",
+              "value": "={{ $json.results.tiktok?.url || \"error\" }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d9d7cd66-f2f6-4af9-91b2-e341a9a98955",
+      "name": "Edit Airtable Fields",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        4768,
+        1920
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e611aba1-e55c-4221-b03b-04008a04fa9c",
+              "name": "ID",
+              "type": "string",
+              "value": "={{ $('Update Airtable with Description').item.json.id }}"
+            },
+            {
+              "id": "47f61cd2-6dd6-4714-b772-3e0537accecd",
+              "name": "Instagram Status",
+              "type": "string",
+              "value": "=success: {{ $json.results.instagram.success }}"
+            },
+            {
+              "id": "12829ca5-2780-4779-be0c-ff1712c012d8",
+              "name": "Instagram URL",
+              "type": "string",
+              "value": "={{ $json.results.instagram?.url || \"error\" }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "89917b3b-0e84-46aa-8dc9-49701685b45b",
+      "name": "Edit Airtable Fields 2",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        4768,
+        2208
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e611aba1-e55c-4221-b03b-04008a04fa9c",
+              "name": "ID",
+              "type": "string",
+              "value": "={{ $('Update Airtable with Description').item.json.id }}"
+            },
+            {
+              "id": "47f61cd2-6dd6-4714-b772-3e0537accecd",
+              "name": "YouTube Status",
+              "type": "string",
+              "value": "=success: {{ $json.results.youtube.success }}"
+            },
+            {
+              "id": "12829ca5-2780-4779-be0c-ff1712c012d8",
+              "name": "Youtube URL",
+              "type": "string",
+              "value": "={{ $json.results.youtube?.url || \"error\" }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dd1995e0-be57-46cc-9f7f-4a3028a87436",
+      "name": "Edit Airtable Fields 3",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        4768,
+        2480
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e611aba1-e55c-4221-b03b-04008a04fa9c",
+              "name": "ID",
+              "type": "string",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "id": "47f61cd2-6dd6-4714-b772-3e0537accecd",
+              "name": "Description",
+              "type": "string",
+              "value": "={{ $('Generate Description for Videos').item.json.message.content }}"
+            },
+            {
+              "id": "f44cc764-ed17-48c3-80e4-c320c6c67a7c",
+              "name": "Video Name",
+              "type": "string",
+              "value": "={{ $('Google Drive').item.json.originalFilename }}"
+            },
+            {
+              "id": "432688c0-d430-4e83-852c-91aad7b4ea79",
+              "name": "Google Drive Links",
+              "type": "string",
+              "value": "={{ $('Google Drive').item.json.webViewLink }}"
+            },
+            {
+              "id": "8804ac95-05d7-48e2-a49d-60213131ec62",
+              "name": "Upload Date",
+              "type": "string",
+              "value": "={{ $now }}"
+            },
+            {
+              "id": "12829ca5-2780-4779-be0c-ff1712c012d8",
+              "name": "",
+              "type": "string",
+              "value": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "eb436ba9-c4fa-441d-9bc7-4a9155c98836",
+      "name": "Edit Airtable Fields1",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        3584,
+        2160
+      ],
+      "typeVersion": 3.4
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Read video from Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Variables": {
+      "main": [
+        [
+          {
+            "node": "Create Airtable Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Airtable Fields": {
+      "main": [
+        [
+          {
+            "node": "Update TikTok Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Audio from Video": {
+      "main": [
+        [
+          {
+            "node": "Generate Description for Videos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Airtable Fields1": {
+      "main": [
+        [
+          {
+            "node": "Update Airtable with Description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Video for TikTok": {
+      "main": [
+        [
+          {
+            "node": "Upload Video to TikTok",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Airtable Record": {
+      "main": [
+        [
+          {
+            "node": "Edit Airtable Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Airtable Fields 2": {
+      "main": [
+        [
+          {
+            "node": "Update Instagram Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Airtable Fields 3": {
+      "main": [
+        [
+          {
+            "node": "Update YouTube Status - Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Video for YouTube": {
+      "main": [
+        [
+          {
+            "node": "Upload Video to YouTube",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Video to TikTok": {
+      "main": [
+        [
+          {
+            "node": "Edit Airtable Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Video to YouTube": {
+      "main": [
+        [
+          {
+            "node": "Edit Airtable Fields 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Video for Instagram": {
+      "main": [
+        [
+          {
+            "node": "Upload Video to Instagram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Video to Instagram": {
+      "main": [
+        [
+          {
+            "node": "Edit Airtable Fields 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read video from Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Get Audio from Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Description for Videos": {
+      "main": [
+        [
+          {
+            "node": "Set Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Airtable with Description": {
+      "main": [
+        [
+          {
+            "node": "Read Video for TikTok",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Video for Instagram",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Video for YouTube",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cd064606110cd556c28b75944cc984cddb10bbdd63deca196ea4cb4095990bc2"
+  },
+  "tags": []
+}

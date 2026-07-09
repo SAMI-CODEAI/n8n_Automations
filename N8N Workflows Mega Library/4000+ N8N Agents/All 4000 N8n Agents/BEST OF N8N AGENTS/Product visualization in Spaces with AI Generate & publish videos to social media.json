@@ -1,0 +1,666 @@
+{
+  "name": "test items in spaces",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "={{ $json.video.url }}",
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "id": "100893ac-f453-42aa-b956-c0932fb17050",
+      "name": "Download Final Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2800,
+        2224
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "path": "generate-ad",
+        "formTitle": "Generate ads",
+        "formDescription": "Upload photo and descriptipon",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "photo1",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "photo2",
+              "fieldType": "file",
+              "multipleFiles": false
+            },
+            {
+              "fieldLabel": "product description",
+              "fieldType": "textarea",
+              "placeholder": "Describe the product"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "46bebf4a-64ba-4dd8-ab58-e15ff871636c",
+      "name": "Photo Upload Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        1152,
+        1744
+      ],
+      "webhookId": "animate-photo-form",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "65f5780e-7894-4d4c-b1d7-b6b922aceebe",
+              "name": "number_of_images",
+              "type": "number",
+              "value": 1
+            },
+            {
+              "id": "e6d64db7-8c79-4f8f-96bf-edbc1faa365d",
+              "name": "size_of_image",
+              "type": "string",
+              "value": "1024x1024"
+            },
+            {
+              "id": "5614f0f0-92d2-4a42-98a7-401f43308b55",
+              "name": "openai_image_model",
+              "type": "string",
+              "value": "gemini-25-flash-image"
+            },
+            {
+              "id": "9ab52e7d-a777-4857-96bd-ae9e06317e54",
+              "name": "format_image",
+              "type": "string",
+              "value": "webp"
+            },
+            {
+              "id": "a7d62af0-baf3-4349-abe9-a75b91edc3f2",
+              "name": "imgbb_api_key",
+              "type": "string",
+              "value": "add_imgbb_api_key"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3e9b95f9-9966-48ae-a0cd-6e721777ff0b",
+      "name": "Set APIs Vars",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1488,
+        1904
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.imgbb.com/1/upload",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "photo1"
+            },
+            {
+              "name": "key",
+              "value": "={{ $json.imgbb_api_key }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ea6fb374-0cb3-4ccf-8465-d1ba35671308",
+      "name": "Upload Original Image to imgbb",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1968,
+        1680
+      ],
+      "retryOnFail": true,
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Separate Image Outputs').item.json.url }}",
+        "options": {}
+      },
+      "id": "a94151cb-cd7b-4324-921a-70ff8c163377",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2624,
+        1728
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "13789e95-b7c3-4952-afaa-5b86e212b225",
+              "name": "prompt-image-edit",
+              "type": "string",
+              "value": "=Place the painting in the room on the back wall, respecting the painting perfectly and the background room and the camera frame in the photo of the room."
+            },
+            {
+              "id": "fb657b62-be6f-4d12-a2e5-884862394515",
+              "name": "prompt-image-to-video",
+              "type": "string",
+              "value": "=Camera pan right and gentle truck/dolly right for the whole clip; the painting stays centered and in focus; reveal the right edge and frame depth; camera height aligned to painting center, medium-wide shot, 35 mm lens, soft gallery lighting; straight vertical lines, natural slight motion blur; no zoom"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "55da4cc0-e01a-499d-a498-1e43e8298afd",
+      "name": "Set Prompts",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1328,
+        1904
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://fal.run/fal-ai/gemini-25-flash-image/edit",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\"prompt\":\"{{ $('Set Prompts').item.json['prompt-image-edit'] }}\",\"image_urls\":[\"{{ $('Upload Original Image to imgbb').item.json.data.url }}\",\"{{ $('Upload Original Image to imgbb1').item.json.data.url }}\"],\"num_images\":{{ $('Set APIs Vars').item.json.number_of_images }}}",
+        "options": {}
+      },
+      "id": "342bd29f-ee12-4efe-bc92-4b6b2d6538e8",
+      "name": "Gemini 2.5 Flash - Generate Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2288,
+        1728
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "images",
+        "options": {}
+      },
+      "id": "2183cad0-726f-4f5d-935f-21bcaaecaaf9",
+      "name": "Separate Image Outputs",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        2448,
+        1728
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map((i)=>({json:{url: i.json.url},binary:{photo2:i.binary.data}}));"
+      },
+      "id": "57f64519-9cc0-43c7-85e9-c3bb406469f7",
+      "name": "Rename to photo",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2800,
+        1728
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.imgbb.com/1/upload",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "photo2"
+            },
+            {
+              "name": "key",
+              "value": "={{ $('Set APIs Vars').item.json.imgbb_api_key }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6671ff1a-647f-4685-a738-f8c748364519",
+      "name": "Upload Image to imgbb",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2960,
+        1728
+      ],
+      "retryOnFail": true,
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/wan/v2.2-a14b/image-to-video",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\"image_url\":\"{{ $json.data.url }}\",\"prompt\":\"{{ $('Set Prompts').item.json['prompt-image-to-video'] }}\",\"num_frames\":96,\"frames_per_second\":24,\"resolution\":\"480p\"}",
+        "options": {}
+      },
+      "id": "b9639d6b-5bb7-4dde-be17-373ebbe0bf29",
+      "name": "FAL WAN i2v (Queue)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1808,
+        2240
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "id": "9b1d04db-5220-4363-afae-e28529d753fc",
+      "name": "Wait i2v",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        2032,
+        2240
+      ],
+      "webhookId": "wan-i2v-wait-2",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/wan/requests/{{ $json.request_id }}/status",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "d169ad43-a82e-44c7-bbbb-00942ac89960",
+      "name": "FAL WAN i2v (status)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2192,
+        2240
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "animation-completed",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "COMPLETED"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cb52daa0-7c54-4af2-9e2c-24139c7ffac9",
+      "name": "Animation Completed?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        2352,
+        2240
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/wan/requests/{{ $json.request_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "af40aba3-323a-40d6-a254-80b3c64a3b0b",
+      "name": "FAL WAN i2v (Result)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2608,
+        2224
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "f895d947-a1b6-4906-843b-c43a26c14f17",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        1664,
+        1760
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "f7623198-6bae-437a-a123-38d6d8b0ddad",
+      "name": "Merge1",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        2144,
+        1728
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.imgbb.com/1/upload",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "photo2"
+            },
+            {
+              "name": "key",
+              "value": "={{ $('Set APIs Vars').item.json.imgbb_api_key }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b61b066a-06f0-41ac-88e4-217f86101441",
+      "name": "Upload Original Image to imgbb1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1968,
+        1856
+      ],
+      "retryOnFail": true,
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "resource": "uploads",
+        "operation": "uploadVideo"
+      },
+      "id": "a606ac87-f1d5-485e-b6b3-f2e6671db4b7",
+      "name": "Upload Post",
+      "type": "n8n-nodes-preview-upload-post.uploadPost",
+      "position": [
+        3008,
+        2224
+      ],
+      "typeVersion": 1,
+      "credentials": {}
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Upload Original Image to imgbb",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload Original Image to imgbb1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Gemini 2.5 Flash - Generate Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait i2v": {
+      "main": [
+        [
+          {
+            "node": "FAL WAN i2v (status)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Prompts": {
+      "main": [
+        [
+          {
+            "node": "Set APIs Vars",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Rename to photo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set APIs Vars": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Rename to photo": {
+      "main": [
+        [
+          {
+            "node": "Upload Image to imgbb",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Photo Upload Form": {
+      "main": [
+        [
+          {
+            "node": "Set Prompts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAL WAN i2v (Queue)": {
+      "main": [
+        [
+          {
+            "node": "Wait i2v",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Animation Completed?": {
+      "main": [
+        [
+          {
+            "node": "FAL WAN i2v (Result)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait i2v",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Final Video": {
+      "main": [
+        [
+          {
+            "node": "Upload Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAL WAN i2v (Result)": {
+      "main": [
+        [
+          {
+            "node": "Download Final Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAL WAN i2v (status)": {
+      "main": [
+        [
+          {
+            "node": "Animation Completed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Image to imgbb": {
+      "main": [
+        [
+          {
+            "node": "FAL WAN i2v (Queue)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separate Image Outputs": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Original Image to imgbb": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Original Image to imgbb1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Gemini 2.5 Flash - Generate Image": {
+      "main": [
+        [
+          {
+            "node": "Separate Image Outputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cd064606110cd556c28b75944cc984cddb10bbdd63deca196ea4cb4095990bc2"
+  },
+  "tags": []
+}

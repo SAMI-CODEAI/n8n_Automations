@@ -1,0 +1,666 @@
+{
+  "name": "Youtube Dubbing AI Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2256,
+        -240
+      ],
+      "id": "d9933156-6322-467e-a30c-e12c9e3c77b2",
+      "name": "Share file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iui61pzlZdZOlErP",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1d34b12f-9670-432c-8b22-c83abd42c234",
+              "leftValue": "={{ $json.done }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4720,
+        -240
+      ],
+      "id": "986ad292-d1ed-4ab6-97dc-76c9ab3b96e8",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4928,
+        -96
+      ],
+      "id": "03716d37-75c7-4228-aeba-2dff37081468",
+      "name": "Wait",
+      "webhookId": "7ff091bd-983a-4d72-b4dd-6f8d41bf3a61"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "15ec8214-dabe-401a-aa1e-f6032b042187",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3120,
+        -224
+      ],
+      "id": "d47a062d-8648-42e6-8b95-9be807553abe",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3328,
+        -128
+      ],
+      "id": "e78b3900-9453-4803-bfea-cd40e17d3aa2",
+      "name": "Wait1",
+      "webhookId": "b28c6cb8-c674-4999-9b9f-57fe4bce6ac0"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "18QIt3fEAoRLkbxmDJlGwscJOumVtGoCY",
+          "mode": "list",
+          "cachedResultName": "Original Audios",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/18QIt3fEAoRLkbxmDJlGwscJOumVtGoCY"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        1984,
+        -240
+      ],
+      "id": "22fcdb27-dbd3-447b-b1e3-d0a8ccfc5957",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iui61pzlZdZOlErP",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst a = \"https://drive.google.com/uc?export=download&id=\"+$('Google Drive Trigger').first().json.id\n\nreturn {audiourl: a}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2496,
+        -240
+      ],
+      "id": "952cec27-9751-412f-983e-0b9c252850f4",
+      "name": "Correct URL"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.assemblyai.com/v2/transcript",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "598ff07c8df24df4bf4d63cef62e366d"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"audio_url\": \"{{ $json.audiourl }}\",\n  \"auto_highlights\": true,\n  \"content_safety\": true,\n  \"custom_spelling\": [],\n  \"disfluencies\": false,\n  \"entity_detection\": true,\n  \"filter_profanity\": true,\n  \"format_text\": true,\n  \"iab_categories\": true,\n  \"language_confidence_threshold\": 0.7,\n  \"language_detection\": true,\n  \"multichannel\": true,\n  \"punctuate\": true,\n  \"redact_pii\": true,\n  \"redact_pii_audio\": true,\n  \"redact_pii_audio_quality\": \"mp3\",\n  \"redact_pii_sub\": \"hash\",\n  \"redact_pii_policies\": [\n    \"us_social_security_number\",\n    \"credit_card_number\"\n  ],\n  \"sentiment_analysis\": true,\n  \"speaker_labels\": false,\n  \"speech_threshold\": 0.5,\n  \"speech_understanding\": {\n    \"request\": {\n      \"translation\": {\n        \"target_languages\": [\"en\"],\n        \"formal\": true,\n        \"match_original_utterance\": true\n      }\n    }\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2704,
+        -240
+      ],
+      "id": "bb780150-c438-4399-8480-4ca6315bbd69",
+      "name": "Generate Transcript"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.assemblyai.com/v2/transcript/{{ $json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "598ff07c8df24df4bf4d63cef62e366d"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2912,
+        -240
+      ],
+      "id": "262727a1-bb4c-48b0-accb-e32cd6f2443f",
+      "name": "Get Transcript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://translation.googleapis.com/language/translate/v2",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "AIzaSyAGegH2sakVTwnz5-k8oTJTu8QQOJYes3Y"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"q\": [\n    \"{{ $json.text }}\"\n  ],\n  \"target\": \"en\",\n  \"source\": \"hi\",\n  \"format\": \"text\",\n  \"model\": \"nmt\"\n}",
+        "options": {}
+      },
+      "id": "80b5edbe-48a7-4869-8545-9d68eb4ecc4c",
+      "name": "Translate to EN",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3600,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://texttospeech.googleapis.com/v1beta1/projects/shining-rush-475708-n8/locations/global:synthesizeLongAudio",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"parent\": \"projects/shining-rush-475708-n8/locations/global\",\n  \"audio_config\":{\n      \"audio_encoding\":\"LINEAR16\",\n      \"speaking_rate\": 1.5\n  },\n  \"input\":{\n      \"text\":\"{{ $node[\"AI Agent\"].data.output }}\"\n  },\n  \"voice\":{\n      \"language_code\": \"en-IN\",\n      \"name\": \"en-IN-Chirp3-HD-Achird\"\n  },\n  \"output_gcs_uri\": \"gs://anaams-dummy/{{ $node[\"Google Drive Trigger\"].data.name }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4304,
+        -240
+      ],
+      "id": "a2db932f-a40f-46ff-a738-e495d176481d",
+      "name": "Generate Speech",
+      "credentials": {
+        "googleApi": {
+          "id": "uvqgeqa86Kad5d1K",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://texttospeech.googleapis.com/v1beta1/{{ $json.name }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4512,
+        -240
+      ],
+      "id": "ff603fb3-7468-45e5-bd0d-8946cc48439c",
+      "name": "Get Speech",
+      "credentials": {
+        "googleApi": {
+          "id": "uvqgeqa86Kad5d1K",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "object",
+        "operation": "get",
+        "bucketName": "anaams-dummy",
+        "objectName": "={{ $node[\"Google Drive Trigger\"].data.name }}",
+        "projection": "full",
+        "getParameters": {},
+        "encryptionHeaders": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.googleCloudStorage",
+      "typeVersion": 1,
+      "position": [
+        5200,
+        -320
+      ],
+      "id": "0f5a24eb-0c2b-4345-86b2-a63faaf32d7b",
+      "name": "Get Speech URL",
+      "credentials": {
+        "googleCloudStorageOAuth2Api": {
+          "id": "PYR1HFa6CO24mZga",
+          "name": "Google Cloud Storage account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.mediaLink }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5408,
+        -320
+      ],
+      "id": "d9eecb89-4c2a-4e58-a1f0-3000975eaf09",
+      "name": "Download Speech",
+      "credentials": {
+        "googleApi": {
+          "id": "uvqgeqa86Kad5d1K",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "={{ $node[\"Google Drive Trigger\"].data.name }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1QmNJkOurj1RUnazUQT2g5gH8eI-Ch8Ho",
+          "mode": "list",
+          "cachedResultName": "Dubbed Audios",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1QmNJkOurj1RUnazUQT2g5gH8eI-Ch8Ho"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5648,
+        -320
+      ],
+      "id": "1ab72a45-8c53-4d10-b6d4-96e4d6451029",
+      "name": "Upload Speech",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iui61pzlZdZOlErP",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Script: {{ $node[\"Script\"].data.text }}",
+        "options": {
+          "systemMessage": "You are a text formatting assistant. Your only task is to add natural punctuation (commas, periods, question marks, exclamation points, etc.) only where punctuation is missing in the given script, so it sounds natural when converted to speech.\nDo not change any words, add or remove text, or include any special characters like quotation marks (\"), backslashes (), or anything that could break a JSON body.\nReturn only the same script with added punctuation — no extra comments, explanations, or formatting."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        4000,
+        -240
+      ],
+      "id": "08328127-aa16-46ed-ae35-78b58f7a2f5c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "projectId": {
+          "__rl": true,
+          "value": "shining-rush-475708-n8",
+          "mode": "list",
+          "cachedResultName": "My First Project"
+        },
+        "modelName": "gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleVertex",
+      "typeVersion": 1,
+      "position": [
+        4000,
+        -32
+      ],
+      "id": "2a50fb56-8d56-408a-9aa9-5faa0f1417bf",
+      "name": "Google Vertex Chat Model",
+      "credentials": {
+        "googleApi": {
+          "id": "uvqgeqa86Kad5d1K",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "text",
+              "value": "={{ $json.data.translations[0].translatedText }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9fa3e01f-5c9c-4714-88f7-dde57d8d238e",
+      "name": "Script",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        3792,
+        -240
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Share file": {
+      "main": [
+        [
+          {
+            "node": "Correct URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get Speech URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Speech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Translate to EN",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Get Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Share file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Correct URL": {
+      "main": [
+        [
+          {
+            "node": "Generate Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Transcript": {
+      "main": [
+        [
+          {
+            "node": "Get Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Transcript": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Translate to EN": {
+      "main": [
+        [
+          {
+            "node": "Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Speech": {
+      "main": [
+        [
+          {
+            "node": "Get Speech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Speech": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Speech URL": {
+      "main": [
+        [
+          {
+            "node": "Download Speech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Speech": {
+      "main": [
+        [
+          {
+            "node": "Upload Speech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Generate Speech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Vertex Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Script": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d3b7f1b8-7d9a-4538-b7f5-96884ac880d4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "150a3ee1a023565209e7f7f988b89f1a1dccf72604c1039816143b38550f0710"
+  },
+  "id": "FifeY7jaIDQnGhLG",
+  "tags": []
+}

@@ -1,0 +1,1061 @@
+{
+  "name": "YT AI Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        -112
+      ],
+      "id": "716a40fa-18ec-4614-88d9-81758042fc45",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1y3kelRLMxsxL0MrUXjLLGDttQQt76D_aLq_SE8nkRow",
+          "mode": "list",
+          "cachedResultName": "dummy-youtube-automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1y3kelRLMxsxL0MrUXjLLGDttQQt76D_aLq_SE8nkRow/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1y3kelRLMxsxL0MrUXjLLGDttQQt76D_aLq_SE8nkRow/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "pending"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        16,
+        -112
+      ],
+      "id": "1822a085-9ec8-4ea1-8214-1ff2cb3c811c",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "e6Z7TaHVcY9hS2QM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.Idea }}",
+        "options": {
+          "systemMessage": "You are a 30-second script writer. Write a concise script that can be directly used for voice generation. Do not include anything extra outside the script. Stick only to the given idea."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        -112
+      ],
+      "id": "9e05282a-945a-4fde-8e21-f21ed011e634",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-preview-05-20",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        224,
+        80
+      ],
+      "id": "2bdcb33b-7b06-4f3c-8427-30c3f5987509",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "zSUcJq9glKsY9Xq1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "options": {
+          "systemMessage": "Generate sufficient image generation prompts that ensure consistent characters and visuals across all images. Use only the provided script as reference, and make sure the prompts together convey the full story. Output only in JSON format as shown below, without any extra text.\"\nRespond only with valid JSON that has the same keys as 'prompt'.\nGive at least five prompts.\nIf you cannot generate JSON, return {}.\n\nExample Output Format:\n\n{\n  \"prompt\": \"first image prompt\",\n  \"prompt\": \"second image prompt\",\n  \"prompt\": \"third image prompt\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        576,
+        -112
+      ],
+      "id": "b1e9dd4d-b929-46cd-a98a-ca1b03729098",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-preview-05-20",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        576,
+        96
+      ],
+      "id": "73b44f0e-b9c6-43b8-821f-4b447ab1cfdf",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "zSUcJq9glKsY9Xq1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let input = $input.first().json.output || \"\";\n\n// 1. Remove code fences like ```json ... ```\ninput = input.replace(/```json|```/g, \"\");\n\n// 2. Trim spaces\ninput = input.trim();\n\n// 3. Fix escaped newlines\ninput = input.replace(/\\\\n/g, \"\");\n\n// 4. Parse into JSON\nlet parsed;\ntry {\n  parsed = JSON.parse(input);\n  // Wrap array inside an object for n8n\n  return [{ json: { data: parsed } }];\n} catch (e) {\n  return [{ json: { valid: false, error: e.message, raw: input } }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        -112
+      ],
+      "id": "95e50c3c-f4cf-4f95-9d02-18bd89cdbea9",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        -112
+      ],
+      "id": "c2420270-731a-482c-b819-ef099e3fc331",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fc28eb8b-45e9-4669-8203-26b059435a6e",
+              "leftValue": "={{ $items().length }}",
+              "rightValue": 5,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1344,
+        -112
+      ],
+      "id": "b825054b-232b-4fc0-8d3a-fa8854ec2438",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "maxItems": 5
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        -96
+      ],
+      "id": "4e54ceea-7774-49e1-be1f-49303142dc21",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1808,
+        -96
+      ],
+      "id": "3dad7d14-f1d8-4dcb-8691-fc95b85d6971",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/imagen4/preview",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Key 98ac4d64-7065-4dde-88b1-c615ab855525:2d656a4ab35979c1128c8b18b2621256"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "={{ $json.data }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2096,
+        -80
+      ],
+      "id": "946782c5-7a4c-4f4e-8018-a9ab292365a9",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2320,
+        -80
+      ],
+      "id": "f4c248e3-011b-4a7d-810b-20a098db7fd6",
+      "name": "Wait",
+      "webhookId": "6ab689ec-2068-4d0d-8bdb-f5a89a379eff"
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/imagen4/requests/{{ $json.request_id }}/status ",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Key 98ac4d64-7065-4dde-88b1-c615ab855525:2d656a4ab35979c1128c8b18b2621256"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2528,
+        -80
+      ],
+      "id": "d4e9ad7b-9a7d-46b6-9c51-4087d5e8a451",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5b87e902-695f-4efa-b6bc-9b26552b1ea7",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "COMPLETED",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2736,
+        -80
+      ],
+      "id": "fc5968f9-babf-4738-b37d-747a3fb05c13",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/imagen4/requests/{{ $json.request_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Key 98ac4d64-7065-4dde-88b1-c615ab855525:2d656a4ab35979c1128c8b18b2621256"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3024,
+        -96
+      ],
+      "id": "f3e4a598-64e2-477a-a9a3-10f53b28c412",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "images[0].url"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        -448
+      ],
+      "id": "c3902473-1125-4e97-a6ae-c77e6093fbb3",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepgram.com/v1/speak",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "aura-2-thalia-en"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Token 4a0f9389506e8e15c670c7aa91ac9aebaead97f5"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $('AI Agent').item.json.output }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "your_output_file.mp3"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2448,
+        -448
+      ],
+      "id": "f22df2cf-5740-467a-8604-53ecc2a4ba42",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.json2video.com/v2/movies",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "YDFceLTdqbcV5VeFCAG4aaBAFf8LINyTFeiihb4D"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"resolution\": \"instagram-story\",\n  \"scenes\": [\n    {\n      \"elements\": [\n        {\n          \"type\": \"image\",\n          \"src\": \"{{ $('Aggregate').item.json.url[0] }}\",\n          \"zoom\": -3,\n          \"resize\": \"fill\",\n          \"position\": \"center-center\"\n        }\n      ],\n      \"duration\": 5\n    },\n    {\n      \"elements\": [\n        {\n          \"type\": \"image\",\n          \"src\": \"{{ $('Aggregate').item.json.url[1] }}\",\n          \"resize\": \"fill\",\n          \"zoom\": -3,\n          \"position\": \"center-center\"\n        }\n      ],\n      \"duration\": 5\n    },\n    {\n      \"elements\": [\n        {\n          \"type\": \"image\",\n          \"src\": \"{{ $('Aggregate').item.json.url[2] }}\",\n          \"resize\": \"fill\",\n          \"zoom\": -3,\n          \"position\": \"center-center\"\n        }\n      ],\n      \"duration\": 5\n    },\n    {\n      \"elements\": [\n        {\n          \"type\": \"image\",\n          \"src\": \"{{ $('Aggregate').item.json.url[3] }}\",\n          \"resize\": \"fill\",\n          \"zoom\": -3,\n          \"position\": \"center-center\"\n        }\n      ],\n      \"duration\": 5\n    },\n    {\n      \"elements\": [\n        {\n          \"type\": \"image\",\n          \"src\": \"{{ $('Aggregate').item.json.url[4] }}\",\n          \"resize\": \"fill\",\n          \"zoom\": -3,\n          \"position\": \"center-center\"\n        }\n      ],\n      \"duration\": 5\n    }\n  ],\n  \"elements\": [\n    {\n      \"type\": \"audio\",\n      \"src\": \"{{ $json.url }}\",\n      \"start\": 0\n    },\n    {\n      \"type\": \"subtitles\",\n      \"settings\": {\n        \"all-caps\": true,\n        \"box-color\": \"#dde5e3\",\n        \"font-family\": \"Roboto\"\n      }\n    }\n  ]\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3280,
+        -448
+      ],
+      "id": "5e717196-c334-4984-9c48-c2ebe6115578",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "your_output_file.mp3",
+        "name": "audio",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1H83061_KN0dz0ew6hjZMDplpJ1ZaMJK7",
+          "mode": "list",
+          "cachedResultName": "Youtube",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1H83061_KN0dz0ew6hjZMDplpJ1ZaMJK7"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2656,
+        -448
+      ],
+      "id": "ee77f985-9839-4c72-8f17-4011f81bf758",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iui61pzlZdZOlErP",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2864,
+        -448
+      ],
+      "id": "fc057cea-9013-484a-8613-62acc6db5330",
+      "name": "Share file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iui61pzlZdZOlErP",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each \nconst a = \"https://drive.google.com/uc?export=download&id=\"+$('Upload file').first().json.id\n\nreturn {url: a}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3072,
+        -448
+      ],
+      "id": "833a09a2-a52b-4285-a572-933000099551",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3552,
+        -448
+      ],
+      "id": "0ee23cd7-fdc0-4536-a1aa-1643016df479",
+      "name": "Wait1",
+      "webhookId": "ea5ea56b-f2ef-467b-847f-f2c609ba2fc5"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.json2video.com/v2/movies",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "project",
+              "value": "={{ $node[\"HTTP Request4\"].json.project }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "YDFceLTdqbcV5VeFCAG4aaBAFf8LINyTFeiihb4D"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3760,
+        -448
+      ],
+      "id": "3126e269-a438-4e54-acfe-1b6b728c748f",
+      "name": "HTTP Request5"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fdcca6a4-490e-453c-a6ba-d9b6ee51dc30",
+              "leftValue": "={{ $node[\"HTTP Request5\"].json.movie.status }}",
+              "rightValue": "running",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3968,
+        -448
+      ],
+      "id": "b3f7192a-2202-4f8a-bf4d-7ce8c33d35fe",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "url": "={{ $node[\"HTTP Request5\"].json.movie.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4240,
+        -432
+      ],
+      "id": "148741bd-5b35-43e3-be27-8f81d410ecf0",
+      "name": "HTTP Request6"
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "upload",
+        "title": "={{ $node[\"Get row(s) in sheet\"].json.Idea }}",
+        "regionCode": "IN",
+        "categoryId": "27",
+        "options": {
+          "description": "={{ $node[\"AI Agent\"].json.output }}"
+        }
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        4448,
+        -432
+      ],
+      "id": "f96597dd-92ce-4e3e-93f6-bfb46930a128",
+      "name": "Upload a video",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "l3JHhbrv3g18qYgU",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1y3kelRLMxsxL0MrUXjLLGDttQQt76D_aLq_SE8nkRow",
+          "mode": "list",
+          "cachedResultName": "dummy-youtube-automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1y3kelRLMxsxL0MrUXjLLGDttQQt76D_aLq_SE8nkRow/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1y3kelRLMxsxL0MrUXjLLGDttQQt76D_aLq_SE8nkRow/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $node[\"Get row(s) in sheet\"].json.row_number }}",
+            "status": "done"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Idea",
+              "displayName": "Idea",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        4656,
+        -432
+      ],
+      "id": "dde0d903-6e9f-4b43-b9b0-317204c7f1bc",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "e6Z7TaHVcY9hS2QM",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Share file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Share file": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request5": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request6": {
+      "main": [
+        [
+          {
+            "node": "Upload a video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload a video": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4973deab-66c3-4641-98d4-0395b5b405b6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "150a3ee1a023565209e7f7f988b89f1a1dccf72604c1039816143b38550f0710"
+  },
+  "id": "QyP2QuOmClMhNvVS",
+  "tags": []
+}

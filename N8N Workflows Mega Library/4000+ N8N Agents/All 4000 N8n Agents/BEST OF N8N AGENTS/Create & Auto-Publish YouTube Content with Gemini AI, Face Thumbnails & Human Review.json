@@ -1,0 +1,902 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=[USER PROMPT]\nDescripción del vídeo:\n{{ $json.content.parts[0].text }}\n\nObjetivo:\nGenera EXACTAMENTE 3 ideas de (title, prompt_thumnail, description, tags) en español (es-ES), con alto impacto SEO y CTR y Maximizando la retencion de las viewrs, cumpliendo estrictamente estas normas:\n- Devuelve SOLO un array JSON válido con 3 objetos.\n- Cada objeto debe tener EXACTAMENTE estas claves: \"prompt_thumnail\", \"title\", \"description\", \"tags\".\n- Las 3 ideas deben ser claramente diferentes (beneficio / urgencia / prueba-sorpresa).\n\nREGLAS DE TÍTULO (campo \"title\"):\n- 55–65 caracteres cuando sea posible, palabra clave principal cerca del inicio si fluye natural.\n- Clickbait responsable (sin engaños ni mayúsculas sostenidas), claro y orientado a beneficio/resultado.\n- Debe casar con el texto sobreimpreso de la miniatura (que lo complemente, no lo repita tal cual).\n\nREGLAS DE MINIATURA (campo \"prompt_thumnail\"):\n- La idea es conseguir el máximo CTR y retención de audiencia y que haga una sinergia genial con el titulo. \n- TODO EN UNA SOLA LINEA SIN SALTOS DE LINEA, Para pasarlo como cadena de texto. Redáctalo como instrucciones directas para un modelo texto-a-imagen que recibirá TAMBIÉN una foto adjunta de mi cara.\n- Miniaturas sencillas: fondo relevante + texto click bait acorde con el titulo + mi cara con expresión de sorpresa.\n- Usa este esquema fijo (cada sección en su propia línea):\n  FONDO: describe un fondo simple y limpio, relacionado con el tema del vídeo; sugiere 1–2 elementos visuales reconocibles; profundidad ligera (blur suave si procede).\n  ROSTRO: \"usa la foto adjunta de mi cara; recorte limpio; colócala [izquierda/derecha]; expresión de sorpresa (cejas elevadas, boca entreabierta); tamaño ≈35–45% del ancho; iluminación pareja; borde/contorno suave si mejora la lectura\".\n  TEXTO: clickbait y coherente con el título; tipografía sans-serif gruesa, alto contraste, sombra o contorno para legibilidad; ubícalo en zona sin ruido visual; evita tapar la cara.\n  COMPOSICIÓN: 16:9 (1280x720), regla de tercios, espacio negativo suficiente alrededor del texto; foco nítido en rostro + mensaje; sin collages ni marcos.\n  ESTILO/COLORES: paleta de 2–3 colores consistentes con el tema; alto contraste; iluminación profesional.\n  CALIDAD/RESTRICCIONES: nítido, sin logos ni marcas registradas, sin marcas de agua, sin texto adicional, sin elementos distractores.\n- Importante: deja claro que el generador debe integrar la FOTO ADJUNTA DE MI CARA en la composición final.\n- No uses comillas ni caracteres especiales solo texto plano.\n\nREGLAS DE DESCRIPCIÓN (campo \"description\"):\n- 2–4 frases con gancho, beneficios y keywords naturales (sin abuso); termina con CTA breve.\n- Menciona de forma sutil el concepto visual (fondo + texto + mi cara con sorpresa) para coherencia con la miniatura.\n- Genera también un timestamp con las partes principales para separar por capitulos el video de youtube\n\nREGLAS DE TAGS (campo \"tags\"):\n- 10 - 15 tags string separados por comas con los terminos optimizados para que me encuentre, long tails y palabras seo que tengan que ver con mi video. \n\nIMPORTANTE:\n- Devuelve SOLO el array JSON con 3 objetos.\n- No añadas texto fuera del JSON.\n- No incluyas comentarios, markdown ni campos adicionales.\n- Escapa correctamente las comillas dentro de strings.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "[SYSTEM PROMPT — ACTUALIZADO]\nEres un generador experto de ideas para títulos, miniaturas y descripciones de vídeos en español (es-ES) orientadas a SEO y alto CTR. Tu salida DEBE ser SOLO un JSON válido (array) con 3 objetos, sin texto adicional, sin markdown, sin comentarios.\n\nREQUISITOS GENERALES\n- Idioma: español de España.\n- Devuelve EXACTAMENTE 3 ideas distintas.\n- Salida: un array JSON con objetos que contengan SOLO estas claves:\n  - \"prompt_thumnail\": string sin saltos de linea solo texto plano sin emoticonos.\n  - \"title\": string (título SEO y clickbait responsable).\n  - \"description\": string (descripción alineada con la miniatura y el título).\n  - \"tags\": string de tags separados por comas\n- El JSON debe usar comillas dobles, sin comas finales, escapando correctamente caracteres especiales.\n- Nada de texto fuera del JSON.\n\nREGLAS DE TÍTULO (campo \"title\")\n- Longitud objetivo: 55–65 caracteres cuando sea posible (sin sacrificar claridad).\n- Coloca la palabra clave principal al inicio si es natural.\n- Un único recurso de potenciación (número, paréntesis, corchetes, pregunta o “cómo/por qué”).\n- Prohibido mayúsculas sostenidas o reclamos engañosos.\n- Las 3 ideas deben cubrir ángulos distintos: (1) beneficio/resultado, (2) urgencia/escasez/tiempo, (3) prueba/demostración/sorpresa.\n- El texto sobreimpreso de la miniatura debe complementar el título (no repetirlo tal cual).\n\nREGLAS DE MINIATURA (campo \"prompt_thumnail\")\n- La idea es conseguir el máximo CTR y retención de audiencia y acorde con el titulo\n- Debe ser una sola linea de texto sin saltos de linea ni caracteres especiales, irá dentro de un string:\n  FONDO: describe un fondo simple, limpio y RELEVANTE con la descripción del vídeo; 1–2 elementos visuales reconocibles; opcional blur suave.\n  ROSTRO: \"usa la FOTO ADJUNTA DE MI CARA; recorte limpio; posición [izquierda/derecha]; expresión de sorpresa (cejas elevadas, boca entreabierta); tamaño ≈35–45% del ancho; iluminación pareja; contorno suave si mejora la lectura\".\n  TEXTO: clickbait y coherente con el título; tipografía sans-serif gruesa, alto contraste, sombra o contorno; ubícalo en zona sin ruido; no tapar la cara.\n  COMPOSICIÓN: 16:9 (1280x720), regla de tercios, espacio negativo suficiente, foco en rostro + mensaje; miniatura SENCILLA (sin collages ni marcos).\n  ESTILO/COLORES: paleta de 2–3 colores acorde al tema; alto contraste; iluminación profesional.\n  CALIDAD/RESTRICCIONES: nítido, sin logos ni marcas registradas, sin marcas de agua, sin texto extra, sin elementos distractores.\n- Mantén total coherencia con el título y la descripción.\n- Deja claro que el generador debe integrar la FOTO ADJUNTA DE MI CARA en la composición final.\n- No uses comillas ni caracteres especiales solo texto plano.\n\n\nREGLAS DE DESCRIPCIÓN (campo \"description\")\n- 2–4 frases con gancho y beneficios clave, naturales y legibles (SEO-friendly).\n- Integra de forma orgánica 2–4 palabras clave relevantes (sin keyword stuffing).\n- Menciona sutilmente el concepto visual (fondo relacionado + texto breve + mi cara con sorpresa) para coherencia.\n- Genera también un timestamp con las partes principales para separar por capítulos el video de youtube\n- Cierra con una llamada a la acción breve (suscribirse, comentar, ver recursos).\n\nREGLAS DE TAGS (campo \"tags\"):\n- 10 - 15 tags string separados por comas con los términos optimizados para que me encuentre, long tails y palabras seo que tengan que ver con mi video. \n\nPROCESO\n1) Lee la descripción del vídeo que recibirás en el prompt del usuario.\n2) Extrae intención, público y palabras clave primarias/secundarias.\n3) Genera 3 propuestas distintas siguiendo las reglas anteriores.\n\nFORMATO DE SALIDA (SOLO JSON)\n[\n  {\n    \"prompt_thumnail\": \"prompt para modelo text to image\",\n    \"title\": \"…\",\n    \"description\": \"…\",\n    \"tags\": \"...\"\n  },\n  {\n    \"prompt_thumnail\": \"prompt para modelo text to image\",\n    \"title\": \"…\",\n    \"description\": \"…\",\n    \"tags\": \"...\"\n  },\n  {\n    \"prompt_thumnail\": \"prompt para modelo text to image\",\n    \"title\": \"…\",\n    \"description\": \"…\",\n    \"tags\": \"...\"\n  }\n]"
+        }
+      },
+      "id": "4d205953-b644-48c8-9472-5bd3fbe301eb",
+      "name": "AI Agent1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        2160,
+        1296
+      ],
+      "retryOnFail": true,
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "id": "9b9152dc-a21b-444b-821c-e58d29218691",
+      "name": "Google Gemini Chat Model4",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "position": [
+        2160,
+        1584
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "[\n  {\n    \"prompt_thumnail\": \"…\",\n    \"title\": \"…\",\n    \"description\": \"…\",\n    \"tags\": \"...\"    \n  },\n  {\n    \"prompt_thumnail\": \"…\",\n    \"title\": \"…\",\n    \"description\": \"…\",\n    \"tags\": \"...\"    \n  },\n  {\n    \"prompt_thumnail\": \"…\",\n    \"title\": \"…\",\n    \"description\": \"…\",\n    \"tags\": \"...\"    \n  }\n]",
+        "autoFix": true
+      },
+      "id": "8deba0ff-2576-4d75-a816-c12bb332ea08",
+      "name": "Structured Output Parser4",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        2224,
+        1504
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "content": "## Drive Trigger",
+        "height": 688,
+        "width": 432,
+        "color": 3
+      },
+      "id": "14d998e3-b906-427f-bb48-43cf2f988737",
+      "name": "Sticky Note27",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1520,
+        1104
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/nano-banana/requests/{{ $json.request_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "dd7ee536-a8ba-4c6d-a9dd-f32430b36c78",
+      "name": "Get Final photo",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3040,
+        1296
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.images[0].url }}",
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "id": "5c87b22c-54a3-4829-a941-497333375af2",
+      "name": "Download Photo 0",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3280,
+        1152
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.images[1].url }}",
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "id": "ff408700-f97a-479e-9f60-0632d06fd4bf",
+      "name": "Download Photo 1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3280,
+        1296
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.images[2].url }}",
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "id": "835a1915-95b4-4ad5-94c7-d3f933b1dc19",
+      "name": "Download Photo 2",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3280,
+        1440
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.images[3].url }}",
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "id": "9fed0880-ac96-41ec-a1f8-0146ddd0bdbf",
+      "name": "Download Photo 3",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3280,
+        1600
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "models/gemini-2.5-flash",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "text": "=Analiza a fondo el vídeo adjunto y escribe UNA DESCRIPCIÓN LARGA y DETALLADA en español de España, lo más extensa posible, 100% fiel a lo que se ve y se oye (sin inventar ni exagerar). Esta descripción servirá después para que otro modelo genere títulos, miniaturas y una descripción final, así que prioriza claridad, contexto y riqueza semántica. Saca también la transcripcion del video\n\nInstrucciones de redacción:\n- Escribe varios párrafos narrativos cohesionados (sin listas ni encabezados). Abre con un gancho claro que resuma el valor del vídeo y a quién ayuda.\n- Desarrolla paso a paso lo que ocurre en el vídeo: problema que aborda, público objetivo, herramientas/métodos utilizados (solo si aparecen), decisiones tomadas, parámetros relevantes, demostraciones, resultados concretos y conclusiones prácticas.\n- Integra de forma natural 5–12 palabras clave y variaciones que realmente se desprendan del contenido (sin “keyword stuffing”), útiles para SEO y coherentes con el tema del vídeo.\n- Menciona de forma sutil elementos visuales importantes que se vean en pantalla (p. ej., texto en pantalla, interfaces, gráficos, comparativas, métricas), y, si puedes inferirlo, referencia momentos destacados con marcas de tiempo aproximadas integradas en el texto (ej.: “sobre el minuto 02:15…”).\n- Incluye consejos, advertencias o errores comunes si el vídeo los muestra o verbaliza; nunca inventes información que no esté en el vídeo.\n- Cierra con una llamada a la acción coherente con el contenido (p. ej., suscribirse, comentar dudas, probar el recurso mostrado).\n\nEstilo y restricciones:\n- Tono: directo, didáctico y honesto.\n- Solo texto plano en párrafos. No añadas títulos, listas, emojis, hashtags, enlaces, ni formato de código.\n- No menciones que eres un modelo ni describas el proceso de análisis; entrega únicamente la descripción final, lo más extensa que permita el contenido del vídeo.\n\n(Entradas opcionales: palabra clave principal o contexto del canal. Si las hay, intégralas de forma natural sin forzar.)",
+        "inputType": "binary",
+        "options": {}
+      },
+      "id": "70252d82-2f28-4636-aa55-050633988c69",
+      "name": "Analyze video2",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "position": [
+        1984,
+        1296
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resume": "form",
+        "formTitle": "Review the posts ",
+        "formDescription": "=➡️ Concepto 0:\n\n  {{ $json.output[0].title }}\n\n➡️ Concepto 1: \n\n  {{ $json.output[1].title }}\n\n➡️ Concepto 2\n\n  {{ $json.output[2].title }}",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Choose option",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "0"
+                  },
+                  {
+                    "option": "1"
+                  },
+                  {
+                    "option": "2"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "208990e2-5386-45be-8707-1789e8d4387e",
+      "name": "Wait to select by user",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        2464,
+        1296
+      ],
+      "webhookId": "f8e6054e-44e4-4987-9698-d5befb8b31b6",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "resume": "form",
+        "formTitle": "Review the posts ",
+        "formDescription": "=➡️ thumbnail 0:\n\n  {{ $('Get Final photo').item.json.images[0].url }}\n\n➡️ thumbnail 1: \n\n  {{ $('Get Final photo').item.json.images[1].url }}\n\n➡️ thumbnail 2:\n\n  {{ $('Get Final photo').item.json.images[2].url }}\n\n➡️ thumbnail 3:\n\n  {{ $('Get Final photo').item.json.images[3].url }}",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Choose option",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "0"
+                  },
+                  {
+                    "option": "1"
+                  },
+                  {
+                    "option": "2"
+                  },
+                  {
+                    "option": "3"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8b71bece-c65f-4bd5-8ca7-2af0f174fdfa",
+      "name": "Wait to select by user1",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        3584,
+        1328
+      ],
+      "webhookId": "f8e6054e-44e4-4987-9698-d5befb8b31b6",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1jojIQ8TUjC_O-HfuhcjZfJSGSOl-h0Om",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1jojIQ8TUjC_O-HfuhcjZfJSGSOl-h0Om",
+          "cachedResultName": "upload-video-youtube"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "id": "f0d1b308-5301-4f28-a1b7-0d499ee0ae5e",
+      "name": "Google Drive Trigger",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "position": [
+        1584,
+        1296
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "uploads",
+        "operation": "uploadVideo"
+      },
+      "id": "40f51bf5-93d3-46f2-8bd0-0e24b54bda27",
+      "name": "Upload a video",
+      "type": "n8n-nodes-preview-upload-post.uploadPost",
+      "position": [
+        3872,
+        1328
+      ],
+      "typeVersion": 1,
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "423b032a-d355-418a-a141-e96da340d04a",
+      "name": "Download file",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        1792,
+        1296
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {}
+          ]
+        },
+        "options": {
+          "includeBinaries": true
+        }
+      },
+      "id": "d08e2423-0fad-4be9-a484-5b8dbde1c308",
+      "name": "Aggregate",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        3440,
+        1328
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Google Drive Trigger').item.json.id }}"
+        },
+        "options": {}
+      },
+      "id": "4b731a1d-ca24-4d95-82be-d46dcabbaaf2",
+      "name": "Download file1",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        3728,
+        1328
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "content": "## Config Fal.ai \n- Here need to add a image_urls with your image or of your avatar\n- And fal.ai api keys\n",
+        "height": 352,
+        "width": 208,
+        "color": 5
+      },
+      "id": "5c62688e-97a2-4d68-88bc-2e86ae626bd7",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2640,
+        1168
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Config upload-post\n- generate api key and connet your youtube account in app.upload-post.com ",
+        "height": 416,
+        "color": 5
+      },
+      "id": "db6404cd-8ec3-446c-9729-27e1a17a8429",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3840,
+        1168
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/nano-banana/edit",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n  \"prompt\": \"{{ $('AI Agent1').item.json.output[$json['Choose option']].prompt_thumnail }}\",\n  \"image_urls\": [\n    \"https://test-videos-upload-post.s3.eu-west-3.amazonaws.com/Captura+de+pantalla+2025-11-07+a+las+18.59.50.png\"\n  ],\n  \"aspect_ratio\": \"16:9\",\n  \"num_images\": 4\n}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 2000
+            }
+          }
+        }
+      },
+      "id": "86a6af15-dbf3-4b24-b7ab-ea57f0c064cf",
+      "name": "Generate thumbnails",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2688,
+        1296
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "content": " ## Description\nThis workflow lets you upload any video you want to publish on YouTube. It analyzes the video and automatically generates a title, description, tags, and several thumbnails for you to choose from and then uploads everything to YouTube automatically\n\n## How it works \nHere’s how it works: when you upload the video to Google Drive, the process starts automatically. The workflow downloads the file and sends the video to Gemini so it can analyze it. Gemini extracts what the video is about, the key points, and the full transcription, and then passes all that to the agent. The agent generates multiple title, description, and tag options for you to choose from. It also creates several thumbnail variations and sends them to you so you can pick your favorite. Once you select everything and confirm, the workflow uploads the video to YouTube with all the details perfectly set up.\n## Setup steps\n- Configure google drive credentials and select a folder to track uploads\n-  Setup Gemini API keys in Analyze video and AI Agent\n-  Configure fal.ai API keys and your avatar Image \n- Configure upload-post API keys, connect your youtube account and select the profile in the node\n",
+        "height": 624,
+        "width": 544
+      },
+      "id": "55b11385-c61e-46cb-8c76-44c9d7f42635",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1520,
+        480
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## AI section, analize video and generate title, description...",
+        "height": 688,
+        "width": 464,
+        "color": 6
+      },
+      "id": "36090cdd-2249-4d97-9c71-84b6ab347e2b",
+      "name": "Sticky Note28",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1952,
+        1104
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Human in the loop \n",
+        "height": 688,
+        "width": 208,
+        "color": 4
+      },
+      "id": "a4dd29f0-e756-4e4a-9a69-833480675266",
+      "name": "Sticky Note29",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2416,
+        1104
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Generate image\n",
+        "height": 688,
+        "width": 928,
+        "color": 3
+      },
+      "id": "073e478a-e733-4dd5-b03a-c00b89d47b06",
+      "name": "Sticky Note30",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2624,
+        1104
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "id": "96c0e48f-5c54-4979-98be-f55ec6c06803",
+      "name": "Wait for images generated",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        2896,
+        1296
+      ],
+      "webhookId": "35829f1e-7d2d-40bf-9dde-964fd9ef9fab",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "content": "## Human in the loop \n",
+        "height": 688,
+        "width": 160,
+        "color": 4
+      },
+      "id": "1afbe3b5-1f81-4695-b944-18afeab0956a",
+      "name": "Sticky Note31",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3552,
+        1104
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Upload to Youtube",
+        "height": 688,
+        "width": 432,
+        "color": 6
+      },
+      "id": "d0b32bb0-22b2-4104-908b-f905158c48cc",
+      "name": "Sticky Note32",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3712,
+        1104
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "@[youtube](EOOgFveae-U)",
+        "height": 384,
+        "width": 592
+      },
+      "id": "29c058e9-b937-41f6-b808-56220ac75321",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2080,
+        640
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {
+    "Google Drive Trigger": [
+      {
+        "json": {
+          "id": "19BsNaCdt1XrRaQxHzNskEkbYoKPQKqlZ",
+          "kind": "drive#file",
+          "name": "clip6.mp4",
+          "size": "5552756",
+          "owners": [
+            {
+              "me": true,
+              "kind": "drive#user",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocKXTrFaEZR70U32IxSgfWday2hhuI4wRrkIeOs_4Kl3vxd0OA=s64",
+              "displayName": "tablagym",
+              "emailAddress": "tablagym@gmail.com",
+              "permissionId": "18443383078559166836"
+            }
+          ],
+          "shared": false,
+          "spaces": [
+            "drive"
+          ],
+          "parents": [
+            "1jojIQ8TUjC_O-HfuhcjZfJSGSOl-h0Om"
+          ],
+          "starred": false,
+          "trashed": false,
+          "version": "8",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/video/mp4",
+          "mimeType": "video/mp4",
+          "ownedByMe": true,
+          "viewedByMe": true,
+          "createdTime": "2025-11-08T17:57:36.474Z",
+          "md5Checksum": "8c2ec87c9a26970c40db9897d279b9eb",
+          "permissions": [
+            {
+              "id": "18443383078559166836",
+              "kind": "drive#permission",
+              "role": "owner",
+              "type": "user",
+              "deleted": false,
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocKXTrFaEZR70U32IxSgfWday2hhuI4wRrkIeOs_4Kl3vxd0OA=s64",
+              "displayName": "tablagym",
+              "emailAddress": "tablagym@gmail.com",
+              "pendingOwner": false
+            }
+          ],
+          "webViewLink": "https://drive.google.com/file/d/19BsNaCdt1XrRaQxHzNskEkbYoKPQKqlZ/view?usp=drivesdk",
+          "capabilities": {
+            "canCopy": true,
+            "canEdit": true,
+            "canShare": true,
+            "canTrash": true,
+            "canDelete": true,
+            "canRename": true,
+            "canComment": true,
+            "canUntrash": true,
+            "canDownload": true,
+            "canReadLabels": false,
+            "canAddChildren": false,
+            "canListChildren": false,
+            "canModifyLabels": false,
+            "canModifyContent": true,
+            "canReadRevisions": true,
+            "canRemoveChildren": false,
+            "canAcceptOwnership": false,
+            "canAddMyDriveParent": false,
+            "canMoveItemOutOfDrive": true,
+            "canMoveItemWithinDrive": true,
+            "canRemoveMyDriveParent": true,
+            "canMoveItemIntoTeamDrive": true,
+            "canMoveChildrenWithinDrive": false,
+            "canModifyContentRestriction": true,
+            "canRemoveContentRestriction": false,
+            "canEnableInheritedPermissions": true,
+            "canChangeSecurityUpdateEnabled": false,
+            "canChangeViewersCanCopyContent": true,
+            "canDisableInheritedPermissions": false,
+            "canChangeItemDownloadRestriction": true,
+            "canModifyOwnerContentRestriction": true,
+            "canModifyEditorContentRestriction": true,
+            "canChangeCopyRequiresWriterPermission": true
+          },
+          "hasThumbnail": true,
+          "modifiedByMe": true,
+          "modifiedTime": "2025-11-01T01:18:33.000Z",
+          "sha1Checksum": "b9569d07188d9ff4f76ef28d3180a5dc985f16f1",
+          "fileExtension": "mp4",
+          "permissionIds": [
+            "18443383078559166836"
+          ],
+          "thumbnailLink": "https://lh3.googleusercontent.com/drive-storage/AJQWtBN95OZNXVQyphASg3AYK7uni_n82xZRP5Vi_iRILyIdyJCwnt9PqUxTBCb0Rl1dxQLrjXUTPI5z2KBNIN1Qi7dE3USfT7HJwbPGbZ-rCCpIaE0=s220",
+          "headRevisionId": "0B4jXLAq4Kh_EU1hWMWJPNWRJM2NCTlBpcCtNb3ptZjNhSlRJPQ",
+          "quotaBytesUsed": "5552756",
+          "sha256Checksum": "a9f002b4b91a303e1939eaa93801d7574202576baefea9e1b57cf61254de349b",
+          "viewedByMeTime": "2025-11-08T17:57:36.474Z",
+          "webContentLink": "https://drive.google.com/uc?id=19BsNaCdt1XrRaQxHzNskEkbYoKPQKqlZ&export=download",
+          "isAppAuthorized": false,
+          "writersCanShare": true,
+          "modifiedByMeTime": "2025-11-01T01:18:33.000Z",
+          "originalFilename": "clip6.mp4",
+          "thumbnailVersion": "1",
+          "explicitlyTrashed": false,
+          "fullFileExtension": "mp4",
+          "lastModifyingUser": {
+            "me": true,
+            "kind": "drive#user",
+            "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocKXTrFaEZR70U32IxSgfWday2hhuI4wRrkIeOs_4Kl3vxd0OA=s64",
+            "displayName": "tablagym",
+            "emailAddress": "tablagym@gmail.com",
+            "permissionId": "18443383078559166836"
+          },
+          "linkShareMetadata": {
+            "securityUpdateEnabled": true,
+            "securityUpdateEligible": false
+          },
+          "videoMediaMetadata": {
+            "width": 1920,
+            "height": 1080,
+            "durationMillis": "35299"
+          },
+          "downloadRestrictions": {
+            "itemDownloadRestriction": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            },
+            "effectiveDownloadRestrictionWithContext": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            }
+          },
+          "viewersCanCopyContent": true,
+          "copyRequiresWriterPermission": false,
+          "inheritedPermissionsDisabled": false
+        }
+      }
+    ]
+  },
+  "connections": {
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Wait to select by user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Wait to select by user1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Analyze video2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze video2": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file1": {
+      "main": [
+        [
+          {
+            "node": "Upload a video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Final photo": {
+      "main": [
+        [
+          {
+            "node": "Download Photo 0",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Download Photo 1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Download Photo 2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Download Photo 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Photo 0": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Photo 1": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Photo 2": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Photo 3": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate thumbnails": {
+      "main": [
+        [
+          {
+            "node": "Wait for images generated",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait to select by user": {
+      "main": [
+        [
+          {
+            "node": "Generate thumbnails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait to select by user1": {
+      "main": [
+        [
+          {
+            "node": "Download file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser4",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser4": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for images generated": {
+      "main": [
+        [
+          {
+            "node": "Get Final photo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cd064606110cd556c28b75944cc984cddb10bbdd63deca196ea4cb4095990bc2"
+  },
+  "tags": []
+}

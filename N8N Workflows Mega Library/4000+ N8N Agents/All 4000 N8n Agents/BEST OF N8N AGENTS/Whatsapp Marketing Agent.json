@@ -1,0 +1,184 @@
+{
+  "name": "Whatsapp Marketing Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        544,
+        -160
+      ],
+      "id": "4ab4d121-f6e5-4fc6-be45-94454d13ba8e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1040,
+        -160
+      ],
+      "id": "0d8cd606-b27c-4b18-bbfa-0cf4b6a9def4",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "sendTo": "awesomehits76@gmail.com",
+        "subject": "Notification About WhatsApp Marketing.",
+        "message": "=The marketing message sent to whatsapp numbers. \n\nBelow are the Numbers:\n\n{{ $node[\"GetNumbers\"].json.toJsonString() }}\n",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1392,
+        -256
+      ],
+      "id": "2b24b423-4b76-4e11-a88c-ffde3c377351",
+      "name": "Send a message",
+      "webhookId": "81040398-6c21-464a-a4e3-8995b97cbc9d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HRoJaxcH2z9m8pZs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1X4oZ1QIkUv6TJ2HdlnXqHi9YzYlrtq6xiI1q95qm7ng",
+          "mode": "list"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1X4oZ1QIkUv6TJ2HdlnXqHi9YzYlrtq6xiI1q95qm7ng/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        -160
+      ],
+      "id": "d7ea61ba-21ab-4136-aa0e-81a0e647e20f",
+      "name": "GetNumbers",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "e6Z7TaHVcY9hS2QM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "phoneNumberId": "762687620271859",
+        "recipientPhoneNumber": "={{ $json.whatsappNumber.toString() }}",
+        "template": "reminding_people|en"
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        -48
+      ],
+      "id": "a5b6cff0-71a4-4ed9-9442-c649456241e5",
+      "name": "Send template",
+      "webhookId": "c639e6c7-a827-43d8-bbb9-741537fe4574",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "DXLbkuqDqZLtVEfr",
+          "name": "WhatsApp account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "GetNumbers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetNumbers": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send template": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "fb79468e-994d-45c3-9d99-dc061c4c7a2a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "150a3ee1a023565209e7f7f988b89f1a1dccf72604c1039816143b38550f0710"
+  },
+  "id": "jtsIHNMn9Gjl0CnM",
+  "tags": []
+}

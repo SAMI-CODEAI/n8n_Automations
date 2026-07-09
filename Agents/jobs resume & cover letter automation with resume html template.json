@@ -1,0 +1,1055 @@
+{
+  "name": "jobs resume & cover letter automation with resume html template",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://000.00.00:3000/forms/chromium/convert/url",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "https://evenkik.github.io/Resume_url/"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ef162d73-6c35-4e79-8ea8-f497d28fe424",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        96,
+        176
+      ],
+      "retryOnFail": false,
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an AI assistant that structures professional experience data for a resume-matching and vector-search system.\n\nYour task is to convert the given unstructured experience text into a clean, professional, and factual JSON object.\n\nGuidelines:\n- Use concise, resume-appropriate language.\n- Keep the tone factual and professional.\n- You may infer missing details in a general, realistic way — but never invent unrelated or false information.\n- If the input text does not contain enough valid or general professional information to create a meaningful entry, output an empty JSON object: {}\n- Each array (tasks, skills, tools) must include at least two relevant and specific items.\n- The summary should briefly describe the main purpose and impact of the experience.\n- Output only valid JSON — no comments, explanations, or extra text.\n\n---\n\nOutput format:\n{\n  \"role\": \"\",\n  \"summary\": \"\",\n  \"tasks\": \"\",\n  \"skills\": \"\",\n  \"tools\": \"\",\n  \"industry\": \"\"\n}\n\n"
+        }
+      },
+      "id": "11193407-b4df-4020-89b6-d4b1b7285204",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        144,
+        1120
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5",
+          "cachedResultName": "gpt-5"
+        },
+        "options": {}
+      },
+      "id": "98baa733-885c-475d-a7d8-ca53d0dc3641",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        96,
+        1344
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "id": "032aebb4-8397-4933-a65d-cecd0c1a38d1",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        224,
+        1344
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"role\": \"\",\n  \"summary\": \"\",\n  \"tasks\": \"\",\n  \"skills\": \"\",\n  \"tools\": \"\",\n  \"industry\": \"\"\n}\n"
+      },
+      "id": "edb1b631-d8d0-4efe-8133-e234d90c7dc7",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        352,
+        1344
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "uD4RCsZ5q6GncPRD",
+          "cachedResultUrl": "/projects/ty2N3FKN04d75oM7/datatables/uD4RCsZ5q6GncPRD",
+          "cachedResultName": "experience"
+        },
+        "columns": {
+          "value": {
+            "Role": "={{ $json.output.role }}",
+            "Tasks": "={{ $json.output.tasks }}",
+            "tools": "={{ $json.output.tools }}",
+            "Skills": "={{ $json.output.skills }}",
+            "Summary": "={{ $json.output.summary }}",
+            "industry": "={{ $json.output.industry }}"
+          },
+          "schema": [
+            {
+              "id": "Role",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "Role",
+              "defaultMatch": false
+            },
+            {
+              "id": "Summary",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "Summary",
+              "defaultMatch": false
+            },
+            {
+              "id": "Tasks",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "Tasks",
+              "defaultMatch": false
+            },
+            {
+              "id": "Skills",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "Skills",
+              "defaultMatch": false
+            },
+            {
+              "id": "tools",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "tools",
+              "defaultMatch": false
+            },
+            {
+              "id": "industry",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "industry",
+              "defaultMatch": false
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "c4e10773-d9ad-4e91-8396-6e91073d2d3c",
+      "name": "Insert row",
+      "type": "n8n-nodes-base.dataTable",
+      "position": [
+        560,
+        1120
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a smart resume personalization agent.\n\nYour task:\n1. Receive a **job description** (list of required skills, responsibilities, or qualifications).\n2. Access my **experience data** from a data table tool (includes my past roles, tasks, and known skills).\n3. Compare my experience to the job description to find **matching skills**.\n4. If some required skills are missing, **add them only if they are not advanced skills**.\n   - A skill is considered **advanced** if it typically takes more than 6 months to learn.\n   - I can learn new apps or workflow integrations for automation within 2 weeks — so these are **not advanced** and can be added.\n5. Generate a personalized application letter tailored to the job description, highlighting my relevant experience, skills, and accomplishments. The letter should be professional, concise, and persuasive, with a clear introduction, body, and closing paragraph. Avoid generic statements; tailor it specifically to the job description.\n\n### Output Format:\nReturn the result as valid JSON in the following structure:\n\n{\n  \"company\": \"company name\",\n  \"job_description\": \"short summary of the job description or title\",\n  \"skills\": [\n    \"skill1\",\n    \"skill2\",\n    \"skill3\"\n  ],\n  \"tools_expertise\": [\n    \"tool1\",\n    \"tool2\",\n    \"tool3\"\n  ],\n  \"application_letter\": \"Your generated application letter here.\"\n}\n\n\n### Example Output:\n{\n  \"company\": \"News Times\",\n  \"job_description\": \"Front-End Web Developer responsible for building responsive and user-friendly interfaces.\",\n  \"skills\": [\n    \"HTML\",\n    \"CSS\",\n    \"JavaScript\"\n  ],\n  \"tools_expertise\": [\n    \"make.com\",\n    \"React\",\n    \"Google Sheets\"\n  ],\n  \"cover_letter\": \"Dear Hiring Manager, I am excited to apply for the [Job Title] role... \n\nSincerely,    \n}\n\n### Rules:\n- Only include **skills relevant to the job**.  \n- Use **clear, human-readable** skill names (no duplicates).  \n- Keep the HTML indentation and `class` attributes exactly as shown.  \n- The JSON must be **valid and clean**.\n- **Do not add language skills** - it already add manually.\n- Maximum of 5 skills and 5 tools_expertise should be included in the output.\n- The application letter must be fully tailored to the job description and emphasize relevant experience\n- Always end the application letter with:\n\nSincerely,  \n<your name>  \n"
+        }
+      },
+      "id": "f8ccc15f-1645-4062-9236-4d9769eab97e",
+      "name": "AI Agent1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        208,
+        512
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "options": {}
+      },
+      "id": "fac5770f-16d7-4235-b09b-8d71225b8fc7",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        96,
+        736
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.from.id }}"
+      },
+      "id": "f0051d90-c59e-4179-8906-9486abc557b2",
+      "name": "Simple Memory1",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        224,
+        736
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "uD4RCsZ5q6GncPRD",
+          "cachedResultUrl": "/projects/ty2N3FKN04d75oM7/datatables/uD4RCsZ5q6GncPRD",
+          "cachedResultName": "experience"
+        },
+        "returnAll": true
+      },
+      "id": "63a778dc-beef-467b-8572-91e1fe921f63",
+      "name": "experience table",
+      "type": "n8n-nodes-base.dataTableTool",
+      "position": [
+        352,
+        736
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1rG2779EUEX07MP36GwOUGmuoCOuoh4d-oUHIkEIhknk",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rG2779EUEX07MP36GwOUGmuoCOuoh4d-oUHIkEIhknk/edit?usp=drivesdk",
+          "cachedResultName": "loker"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rG2779EUEX07MP36GwOUGmuoCOuoh4d-oUHIkEIhknk/edit#gid=0",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "value": {
+            "link": "={{ $('Telegram Trigger').item.json.message.link_preview_options.url }}",
+            "company": "={{ $('AI Agent1').item.json.output.company }}",
+            "surat-lamaran": "={{ $('AI Agent1').item.json.output.application_letter }}\n\nsorry before, but i think action works more then just some words, what i want to say is this job aplying process is actualy using n8n automation workflow. that i can explain more at interview.",
+            "job description": "={{ $('AI Agent1').item.json.output.job_description }}"
+          },
+          "schema": [
+            {
+              "id": "company",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "company",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "job description",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "job description",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "surat-lamaran",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "surat-lamaran",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resume",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "required": false,
+              "displayName": "resume",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "link",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "link",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "2faf5de0-ec83-4087-b1bc-3ab29538841e",
+      "name": "Append row in sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1296,
+        624
+      ],
+      "typeVersion": 4.7
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1rG2779EUEX07MP36GwOUGmuoCOuoh4d-oUHIkEIhknk",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rG2779EUEX07MP36GwOUGmuoCOuoh4d-oUHIkEIhknk/edit?usp=drivesdk",
+          "cachedResultName": "loker"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rG2779EUEX07MP36GwOUGmuoCOuoh4d-oUHIkEIhknk/edit#gid=0",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "value": {
+            "resume": "={{ $json.webContentLink }}",
+            "company": "={{ $('github change trigger').item.json.body.message }}",
+            "surat-lamaran": "="
+          },
+          "schema": [
+            {
+              "id": "company",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "company",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "job description",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "job description",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "surat-lamaran",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "surat-lamaran",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resume",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "resume",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "link",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "link",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "company"
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "98836d09-94e7-408f-86e8-f3bec1e2735f",
+      "name": "Append or update row in sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        544,
+        176
+      ],
+      "typeVersion": 4.7
+    },
+    {
+      "parameters": {
+        "name": "=resume-{{ $json.body.message }}.pdf",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1f3IB0LnlUjaFFTiLL1grQYnbBxuduPpi",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1f3IB0LnlUjaFFTiLL1grQYnbBxuduPpi",
+          "cachedResultName": "resume"
+        },
+        "options": {}
+      },
+      "id": "7825c731-b28a-4e9f-8154-b30b4429c024",
+      "name": "Upload file",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        320,
+        176
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "chatId": "<add your telegram chat ID>",
+        "text": "Done...",
+        "additionalFields": {
+          "appendAttribution": true
+        }
+      },
+      "id": "fa36c349-56d7-40d1-ad3e-a3f5104524d4",
+      "name": "Send a text message",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        768,
+        176
+      ],
+      "webhookId": "05addb7a-0469-4b4f-bda4-c92103d6dfc2",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "69c5176f-5070-4c94-b0f2-b1bee3be9b95",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        -128,
+        1120
+      ],
+      "webhookId": "87922fe9-11f1-4ba0-963d-cc17819c411a",
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "content": "## Experience Input Agent\n\nThis agent is a simple database input tool for recording your experiences.  \nThe stored data can then be used by the main agent for **RAG (Retrieval-Augmented Generation)**.  \n\nYou can also upgrade this agent to a **vector database** if you have many experience entries and want to **reduce token consumption** by the LLM.\n",
+        "height": 560,
+        "width": 1040
+      },
+      "id": "84495cdb-d7e0-43d7-995c-4a7b85684a36",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -192,
+        928
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "70b2c288-091b-4dce-9d46-06d4c167efb8",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [
+        -128,
+        560
+      ],
+      "webhookId": "9646c094-54df-4127-9285-4537f87f15fa",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "content": "## Resume Download and Link Transfer\n\nThis workflow downloads the crafted resume, uploads it to Google Drive, and adds the download link to a sheet.\n",
+        "height": 288,
+        "width": 1184,
+        "color": 6
+      },
+      "id": "ec8bdd47-d630-433c-83a4-094961ad0a07",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -192,
+        64
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "path": "fc896fbb-4a70-48d2-a416-564a3eeeae91",
+        "options": {}
+      },
+      "id": "58bb13df-9c4e-4981-9493-99211df5a57a",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        -96,
+        176
+      ],
+      "webhookId": "fc896fbb-4a70-48d2-a416-564a3eeeae91",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "content": "## Job Analyst Agent (Main)\n\nThis is the main agent responsible for analyzing job descriptions, generating cover letters, and creating personalized resumes.\n",
+        "height": 512,
+        "width": 1696,
+        "color": 4
+      },
+      "id": "fb501047-0696-4f72-b8f9-9823713d1810",
+      "name": "style.css",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -192,
+        384
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n    \"company\": \"\",\n  \"job_description\": \"\",\n  \"skills\": [\n    \"skills\",\n    \"skills\",\n    \"skills\"\n  ],\n  \"tools_expertise\": [\n    \"tool\",\n    \"tool\",\n    \"tool\"\n  ],\n\"application_letter\": \"\"\n}"
+      },
+      "id": "9dd4279e-ef88-4fcf-a984-703ad01c02df",
+      "name": "JSON Output",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        480,
+        736
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://github.com/<username>"
+        },
+        "repository": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Job-apply"
+        },
+        "filePath": "docs/index.html",
+        "fileContent": "={{ $json.html }}",
+        "commitMessage": "={{ $('AI Agent1').item.json.output.company }}"
+      },
+      "id": "49439f1c-49cd-4eb3-b5d8-55daf1fe5bff",
+      "name": "github",
+      "type": "n8n-nodes-base.github",
+      "position": [
+        1104,
+        624
+      ],
+      "webhookId": "9236ca99-d548-4ea9-b8c7-4ea98f0d9394",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "html": "<!DOCTYPE html>\n<html lang=\"en\">\n\n  <head>\n    <meta charset=\"UTF-8\">\n    <title>Lorem Ipsum Resume</title>\n    <link rel=\"stylesheet\" href=\"https://public.codepenassets.com/css/reset-2.0.min.css\">\n    <link rel=\"stylesheet\" href=\"./style.css\">\n  </head>\n    \n  <body>\n  <!-- FONTS -->\n  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300,400,600' rel='stylesheet' type='text/css'>\n  <link href='https://fonts.googleapis.com/css?family=Raleway:100' rel='stylesheet' type='text/css'>\n  <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>\n\n  <!-- PAGE STUFF -->\n  <div class=\"rela-block page\">\n    <div class=\"rela-block top-bar\">\n      <div class=\"caps name\">\n        <div class=\"abs-center\">\n          Lorem Ipsum\n          <div class=\"contact-info\">\n            <p>1234 Dolor Sit Street</p>\n            <p>Amet City, Consectetur 56789</p>\n            <p>+1234567890</p>\n            <p>user@example.com</p>\n          </div>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"side-bar\">\n      <div class=\"mugshot\">\n        <div class=\"logo\">\n          <svg viewbox=\"0 0 80 80\" class=\"rela-block logo-svg\">\n            <path d=\"M 10 10 L 52 10 L 72 30 L 72 70 L 30 70 L 10 50 Z\" stroke-width=\"2.5\" fill=\"none\"/>\n          </svg>\n          <p class=\"logo-text\">LIP</p>\n        </div>\n      </div><br>\n      <p class=\"rela-block social twitter\">lorem_ipsum</p>\n      <p class=\"rela-block social linked-in\">lorem-ipsum-dolor</p>\n\n      <p class=\"rela-block caps side-header\">Skills</p>\n      <p class=\"rela-block list-thing\">Lorem Ipsum</p>\n      <p class=\"rela-block list-thing\">Dolor Sit</p>\n      <p class=\"rela-block list-thing\">Amet Consectetur</p>\n\n      <p class=\"rela-block caps side-header\">Expertise</p>\n      <p class=\"rela-block list-thing\">Adipiscing Elit</p>\n      <p class=\"rela-block list-thing\">Sed Do Eiusmod</p>\n      <p class=\"rela-block list-thing\">Tempor Incididunt</p>\n    </div>\n\n    <div class=\"rela-block content-container\">\n      <h2 class=\"rela-block caps title\">Lorem Ipsum Developer</h2>\n      <div class=\"rela-block separator\"></div>\n\n      <div class=\"rela-block caps greyed\">Profile</div>\n      <p class=\"long-margin\">\n        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n      </p>\n\n      <div class=\"rela-block caps greyed\">Experience</div>\n\n      <h3>#1 job</h3>\n      <p class=\"light\">job description</p>\n      <p class=\"justified\">\n        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\n        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n      </p>\n        \n      <h3>#2 job</h3>\n      <p class=\"light\">Job description</p>\n      <p class=\"justified\">\n        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n        Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.\n      </p>\n        \n      <div class=\"rela-block caps greyed\">Education</div>\n      <h3>Bachelor of Lorem Engineering</h3>\n      <p class=\"light\">At Ipsum University, Dolorland - 2023</p>\n\n      <div class=\"rela-block caps greyed\">Language</div>\n      <h3>Loremese - native</h3>\n      <h3>Ipsumish - fluent</h3>\n    </div>\n  </div>\n    \n  <script src='https://code.jquery.com/jquery-2.2.4.min.js'></script>\n  <script src=\"./script.js\"></script>\n\n  </body>\n</html>\n"
+      },
+      "id": "a32bbc2b-de1d-484a-87ee-a93136a200f7",
+      "name": "HTML code",
+      "type": "n8n-nodes-base.html",
+      "position": [
+        912,
+        624
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function to trim LinkedIn job URLs\nconst trimLinkedInJobUrl = (url) => {\n  const match = url.match(/^(https:\\/\\/www\\.linkedin\\.com\\/jobs\\/view\\/\\d+)/);\n  return match ? match[1] : url;\n};\n\n// Main n8n Code node\nreturn items.map(item => {\n    // Access data\n    const skills = item.json.output.skills || [];\n    const tools = item.json.output.tools_expertise || [];\n\n    // Get LinkedIn URL from Telegram Trigger\n    const rawUrl = $('Telegram Trigger').first().json.message.link_preview_options.url;\n    const trimmedUrl = rawUrl ? trimLinkedInJobUrl(rawUrl) : null;\n\n    // Build HTML for skills\n    const htmlOutput = skills\n        .map(skill => `<p class=\"rela-block list-thing\">${skill}</p>`)\n        .join(\"\\n\");\n\n    // Build HTML for tools\n    const htmlTools = tools\n        .map(tool => `<p class=\"rela-block list-thing\">${tool}</p>`)\n        .join(\"\\n\");\n\n    // Return data\n    return {\n        json: {\n            skill: htmlOutput,\n            tool: htmlTools,\n            trimmed_url: trimmedUrl\n        }\n    };\n});\n"
+      },
+      "id": "aa3b4afc-1893-4b04-b461-dd0bd08ee110",
+      "name": "change JSON to HTML",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        688,
+        624
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {},
+      "id": "472aba25-e36f-4589-a2e6-7d40e7164b9b",
+      "name": "When clicking ‘Execute workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        944,
+        1184
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## GITHUB SETUP\nRun this once to add **style.css** to the GitHub repository.\n\n## Note\n\nReplace `<your_webhook_url>` at the end of the **notify-n8n.yml** in set node with your actual n8n webhook URL.\n",
+        "height": 416,
+        "width": 1152,
+        "color": 3
+      },
+      "id": "2faf5f9b-b29d-49d0-ae49-2fad25204ed4",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        880,
+        928
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://github.com/<username>"
+        },
+        "repository": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Job-apply"
+        },
+        "filePath": "docs/style.css",
+        "fileContent": "={{ $json.css }}",
+        "commitMessage": "=style.css"
+      },
+      "id": "0297bce4-0d4f-4754-b228-204f4e4c850d",
+      "name": "style.css1",
+      "type": "n8n-nodes-base.github",
+      "position": [
+        1392,
+        1184
+      ],
+      "webhookId": "9236ca99-d548-4ea9-b8c7-4ea98f0d9394",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7b21573f-1530-4841-9b3a-9311b30237d2",
+              "name": "css",
+              "type": "string",
+              "value": "* {\n  box-sizing: border-box;\n  transition: 0.35s ease;\n}\n\n.rela-block {\n  display: block;\n  position: relative;\n  margin: auto;\n}\n\n.rela-inline {\n  display: inline-block;\n  position: relative;\n  margin: auto;\n}\n\n.floated {\n  display: inline-block;\n  position: relative;\n  float: left;\n}\n\n.abs-center {\n  position: absolute;\n  top: 25%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  text-align: center;\n  width: 88%;\n}\n\nbody {\n  font-family: 'Open Sans';\n  font-size: 14px;\n  letter-spacing: 0;\n  font-weight: 400;\n  line-height: 14px;\n  background: url(\"http://kingofwallpapers.com/leaves/leaves-016.jpg\") right no-repeat;\n  background-size: cover;\n}\n\nbody:before {\n  content: \"\";\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background-color: rgba(255, 255, 255, 0.92);\n}\n\n.caps {\n  text-transform: uppercase;\n}\n\n.justified {\n  text-align: justify;\n}\n\np.light {\n  color: #777;\n}\n\nh2 {\n  font-family: 'Open Sans';\n  font-size: 24px;\n  letter-spacing: 5px;\n  font-weight: 600;\n  line-height: 30px;\n  color: #000;\n}\n\nh3 {\n  font-family: 'Open Sans';\n  font-size: 21px;\n  letter-spacing: 1px;\n  font-weight: 600;\n  line-height: 15px;\n  color: #000;\n}\n\n.page {\n  width: 100%;\n  height: 100vh;\n  margin: 0;\n  background-color: #fff;\n  box-shadow: none;\n}\n\n.top-bar {\n  height: 150px;\n  background-color: #848484;\n  color: #fff;\n}\n\n.name {\n  position: absolute;\n  left: calc(200px + 5%);\n  right: 0;\n  height: 90px;\n  text-align: center;\n  font-family: 'Raleway';\n  font-size: 32px;\n  letter-spacing: 8px;\n  font-weight: 100;\n  line-height: 60px;\n}\n\n.name div {\n  width: 94%;\n}\n\n.side-bar {\n  position: absolute;\n  top: 40px;\n  left: 1%;\n  bottom: 40px;\n  width: 150px;\n  background-color: #f7e0c1;\n  padding: 220px 3px 2px;\n}\n\n.mugshot {\n  position: absolute;\n  top: 50px;\n  left: 25px;\n  height: 100px;\n  width: 100px;\n}\n\n.mugshot .logo {\n  margin: 0;\n}\n\n.logo {\n  position: absolute;\n  top: 0;\n  left: 0;\n  z-index: 100;\n  color: #000;\n  height: 120px;\n  width: 120px;\n}\n\n.logo .logo-svg {\n  height: 100%;\n  width: 100%;\n  stroke: #000;\n  cursor: pointer;\n}\n\n.logo .logo-text {\n  position: absolute;\n  top: 45%;\n  right: 16%;\n  cursor: pointer;\n  font-family: \"Montserrat\";\n  font-size: 25px;\n  font-weight: 400;\n  line-height: 58px;\n}\n\n.social {\n  padding-left: 25px;\n  margin-bottom: 25px;\n  cursor: pointer;\n  position: relative;\n}\n\n.social:before {\n  content: \"\";\n  position: absolute;\n  top: -4px;\n  left: 0;\n  height: 20px;\n  width: 20px;\n  background-size: cover !important;\n}\n\n.social.twitter:before {\n  background: url(\"https://cdn4.iconfinder.com/data/icons/iconsimple-logotypes/512/github-256.png\") center no-repeat;\n}\n\n.social.github:before {\n  background: url(\"https://cdn3.iconfinder.com/data/icons/social-media-2026/60/Socialmedia_icons_Pinterest-23-128.png\") center no-repeat;\n}\n\n.social.linked-in:before {\n  background: url(\"https://cdn3.iconfinder.com/data/icons/social-media-2026/60/Socialmedia_icons_LinkedIn-128.png\") center no-repeat;\n}\n\n.side-header {\n  font-family: 'Open Sans';\n  font-size: 18px;\n  letter-spacing: 1px;\n  font-weight: 600;\n  line-height: 21px;\n  margin: 40px auto 10px;\n  padding-bottom: 5px;\n  border-bottom: 1px solid #888;\n}\n\n.list-thing {\n  padding-left: 25px;\n  margin-bottom: 10px;\n}\n\n.content-container {\n  margin-right: 0;\n  width: calc(95% - 150px);\n  padding: 25px 20px 50px;\n}\n\n.content-container > * {\n  margin: 0 auto 15px;\n}\n\n.content-container > h3 {\n  margin: 0 auto 10px;\n}\n\n.contact-block {\n  position: relative;\n  text-align: center;\n  width: 88%;\n"
+            },
+            {
+              "id": "91801897-70b0-4ebb-91c4-a7097e2cf4e4",
+              "name": "html",
+              "type": "string",
+              "value": "<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Lorem Ipsum Resume</title>\n  <link rel=\"stylesheet\" href=\"https://public.codepenassets.com/css/reset-2.0.min.css\">\n  <link rel=\"stylesheet\" href=\"./style.css\">\n</head>\n\n<body>\n  <!-- FONTS -->\n  <link href=\"https://fonts.googleapis.com/css?family=Open+Sans:300,400,600\" rel=\"stylesheet\" type=\"text/css\">\n  <link href=\"https://fonts.googleapis.com/css?family=Raleway:100\" rel=\"stylesheet\" type=\"text/css\">\n  <link href=\"https://fonts.googleapis.com/css?family=Montserrat\" rel=\"stylesheet\" type=\"text/css\">\n\n  <!-- PAGE STUFF -->\n  <div class=\"rela-block page\">\n    <div class=\"rela-block top-bar\">\n      <div class=\"caps name\">\n        <div class=\"abs-center\">\n          Lorem Ipsum\n          <div class=\"contact-info\">\n            <p>1234 Dolor Sit Street</p>\n            <p>Amet City, Consectetur 56789</p>\n            <p>+1234567890</p>\n            <p>user@example.com</p>\n          </div>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"side-bar\">\n      <div class=\"mugshot\">\n        <div class=\"logo\">\n          <svg viewBox=\"0 0 80 80\" class=\"rela-block logo-svg\">\n            <path d=\"M 10 10 L 52 10 L 72 30 L 72 70 L 30 70 L 10 50 Z\" stroke-width=\"2.5\" fill=\"none\" />\n          </svg>\n          <p class=\"logo-text\">LIP</p>\n        </div>\n      </div>\n      <br>\n      <p class=\"rela-block social twitter\">lorem_ipsum</p>\n      <p class=\"rela-block social linked-in\">lorem-ipsum-dolor</p>\n\n      <p class=\"rela-block caps side-header\">Skills</p>\n      <p class=\"rela-block list-thing\">Lorem Ipsum</p>\n      <p class=\"rela-block list-thing\">Dolor Sit</p>\n      <p class=\"rela-block list-thing\">Amet Consectetur</p>\n\n      <p class=\"rela-block caps side-header\">Expertise</p>\n      <p class=\"rela-block list-thing\">Adipiscing Elit</p>\n      <p class=\"rela-block list-thing\">Sed Do Eiusmod</p>\n      <p class=\"rela-block list-thing\">Tempor Incididunt</p>\n    </div>\n\n    <div class=\"rela-block content-container\">\n      <h2 class=\"rela-block caps title\">Lorem Ipsum Developer</h2>\n      <div class=\"rela-block separator\"></div>\n\n      <div class=\"rela-block caps greyed\">Profile</div>\n      <p class=\"long-margin\">\n        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore\n        magna aliqua.\n        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n      </p>\n\n      <div class=\"rela-block caps greyed\">Experience</div>\n\n      <h3>#1 Job</h3>\n      <p class=\"light\">Job description</p>\n      <p class=\"justified\">\n        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\n        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n      </p>\n\n      <h3>#2 Job</h3>\n      <p class=\"light\">Job description</p>\n      <p class=\"justified\">\n        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n        Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.\n      </p>\n\n      <div class=\"rela-block caps greyed\">Education</div>\n      <h3>Bachelor of Lorem Engineering</h3>\n      <p class=\"light\">At Ipsum University, Dolorland - 2023</p>\n\n      <div class=\"rela-block caps greyed\">Language</div>\n      <h3>Loremese - native</h3>\n      <h3>Ipsumish - fluent</h3>\n    </div>\n  </div>\n\n  <script src=\"https://code.jquery.com/jquery-2.2.4.min.js\"></script>\n  <script src=\"./script.js\"></script>\n</body>\n\n</html>\n"
+            },
+            {
+              "id": "6872f821-95f7-4815-8929-d3bb23a30681",
+              "name": "yml",
+              "type": "string",
+              "value": "name: Notify n8n on GitHub Pages Deploy\n\non:\n  workflow_run:\n    workflows: [\"pages-build-deployment\"]\n    types:\n      - completed\n\njobs:\n  notify:\n    if: ${{ github.event.workflow_run.conclusion == 'success' }}\n    runs-on: ubuntu-latest\n    steps:\n      - name: Get commit message\n        id: get_message\n        run: |\n          COMMIT_MESSAGE=$(curl -s \\\n            -H \"Accept: application/vnd.github+json\" \\\n            -H \"Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}\" \\\n            https://api.github.com/repos/${{ github.repository }}/commits/${{ github.event.workflow_run.head_sha }} \\\n            | jq -r '.commit.message')\n          echo \"message=$COMMIT_MESSAGE\" >> $GITHUB_OUTPUT\n\n      - name: Send POST to n8n webhook\n        run: |\n          curl -X POST \\\n            -H \"Content-Type: application/json\" \\\n            -d \"{\\\"status\\\": \\\"deployed\\\", \\\n                 \\\"repo\\\": \\\"${{ github.repository }}\\\", \\\n                 \\\"branch\\\": \\\"${{ github.ref_name }}\\\", \\\n                 \\\"commit\\\": \\\"${{ github.event.workflow_run.head_sha }}\\\", \\\n                 \\\"message\\\": \\\"${{ steps.get_message.outputs.message }}\\\"}\" \\\n            <your_webhook_url>"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "22a813c1-f1f8-4937-9871-1d54d54236c8",
+      "name": "css +yml code",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1168,
+        1184
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://github.com/<username>"
+        },
+        "repository": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Job-apply"
+        },
+        "filePath": "docs/index.html",
+        "fileContent": "={{ $json.html }}",
+        "commitMessage": "index.html"
+      },
+      "id": "3aee2eab-6652-45ea-95be-26f4861c1869",
+      "name": "index.html setup",
+      "type": "n8n-nodes-base.github",
+      "position": [
+        1616,
+        1184
+      ],
+      "webhookId": "9236ca99-d548-4ea9-b8c7-4ea98f0d9394",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://github.com/<username>"
+        },
+        "repository": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Job-apply"
+        },
+        "filePath": "github/workflows/notify-n8n.yml",
+        "fileContent": "={{ $json['notify-n8n'].yml }}",
+        "commitMessage": "=notify-n8n.yml"
+      },
+      "id": "1a439bb8-74d3-419a-9f95-e7fff3cc4110",
+      "name": "yml setup",
+      "type": "n8n-nodes-base.github",
+      "position": [
+        1840,
+        1184
+      ],
+      "webhookId": "9236ca99-d548-4ea9-b8c7-4ea98f0d9394",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "content": "## HTML template\nEdit this to your liking can use llm to help found where can be edited\n",
+        "height": 272
+      },
+      "id": "be7bb6d2-f72c-4ed0-85e9-2afbfb1b2470",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        848,
+        512
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "github": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "change JSON to HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML code": {
+      "main": [
+        [
+          {
+            "node": "github",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "style.css1": {
+      "main": [
+        [
+          {
+            "node": "index.html setup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JSON Output": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "css +yml code": {
+      "main": [
+        [
+          {
+            "node": "style.css1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "experience table": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "index.html setup": {
+      "main": [
+        [
+          {
+            "node": "yml setup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "change JSON to HTML": {
+      "main": [
+        [
+          {
+            "node": "HTML code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "css +yml code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "35aa4241-24bc-470a-be10-d3125fc4c3cb",
+  "meta": {
+    "instanceId": "8e2b3d13ae6fa6559fbcb82596263a9a3c863b26c25db9e2d4c29a96e06d8c68"
+  },
+  "nodeGroups": [],
+  "id": "pZswHDX9BAt3cBSM",
+  "tags": []
+}

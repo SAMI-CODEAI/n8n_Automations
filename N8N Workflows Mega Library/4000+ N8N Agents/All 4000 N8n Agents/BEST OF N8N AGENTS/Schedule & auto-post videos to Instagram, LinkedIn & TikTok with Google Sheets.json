@@ -1,0 +1,607 @@
+{
+  "name": "AI Video Avatar Generator: Turn URLs into Shorts (Using Free Tier APIS)",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "97b7d7fa-1c7e-480c-8a01-52f63cab87bb",
+              "name": "Title",
+              "type": "string",
+              "value": "={{ $('Google Sheets').item.json.Title }}"
+            },
+            {
+              "id": "72e6c291-ddc2-46f1-960a-ac2036c80105",
+              "name": "Copy",
+              "type": "string",
+              "value": "={{ $('Google Sheets').item.json.Copy }}"
+            },
+            {
+              "id": "f50748ec-1027-458d-b263-1b9c132bd5d2",
+              "name": "Status",
+              "type": "string",
+              "value": "={{ $('Google Sheets').item.json.Status }}"
+            },
+            {
+              "id": "e1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
+              "name": "video_url",
+              "type": "string",
+              "value": "={{ $('Google Sheets').item.json[\"Video Link\"] }}"
+            },
+            {
+              "id": "f1g2h3i4-j5k6-l7m8-n9o0-p1q2r3s4t5u6",
+              "name": "is_drive_file",
+              "type": "boolean",
+              "value": true
+            },
+            {
+              "id": "row-number-drive",
+              "name": "row_number",
+              "type": "number",
+              "value": "={{ $('Google Sheets').item.json.row_number }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b2e6aadc-f246-4117-9fb5-eb1dc4b19872",
+      "name": "Format Drive Content",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        4512,
+        1072
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9eeb5af9-55a3-47ab-ab27-a87bbd91755c",
+              "name": "facebook id (Page Id)",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "7e3308c5-bf44-4b1e-8d63-8efaccd4f763",
+              "name": "board id (Pinterest)",
+              "type": "string",
+              "value": ""
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "2edc770d-6a90-4b5f-83cb-be4d196abebb",
+      "name": "Social Media Account IDs",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        4704,
+        1072
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1ZKbnD7GM6eAHKzyDY98cvz9jMUib1HLU7d9gohYkR3s"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZKbnD7GM6eAHKzyDY98cvz9jMUib1HLU7d9gohYkR3s/edit#gid=0",
+          "cachedResultName": "Video"
+        },
+        "columns": {
+          "value": {
+            "Status": "Posteado",
+            "row_number": "={{ $('Google Sheets').item.json.row_number }}"
+          },
+          "schema": [
+            {
+              "id": "Title",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Title",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Copy",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Copy",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Video Link",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Video Link",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Plataforma",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "Plataforma",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "Status",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha.Hora",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Fecha.Hora",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Día",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Día",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "type": "number",
+              "display": true,
+              "removed": false,
+              "readOnly": true,
+              "required": false,
+              "displayName": "row_number",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "row_number"
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "a1a131ec-a752-4967-be55-912df059ea90",
+      "name": "Google Sheets1",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        5200,
+        1120
+      ],
+      "typeVersion": 4.6
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "or",
+          "conditions": [
+            {
+              "id": "057ea0fb-bba4-4394-bcda-c66fe860467b",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json['Readable time'] }}",
+              "rightValue": "={{ $('Google Sheets').item.json[\"Fecha.Hora\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2c406bea-1b5a-4dea-a083-6135225bb1c9",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        4272,
+        1088
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtener la fecha del Schedule Trigger\nconst triggerData = $('Schedule Trigger').first().json;\nconst originalDate = new Date(triggerData.scheduled || triggerData.timestamp || new Date());\n\n// Convertir a zona horaria de Santiago de Chile\nconst santiagoDate = new Date(originalDate.toLocaleString(\"en-US\", {timeZone: \"America/Santiago\"}));\n\n// Arrays para traducir al español\nconst meses = [\n  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',\n  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'\n];\n\nconst diasSemana = [\n  'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'\n];\n\n// Extraer componentes de la fecha\nconst dia = santiagoDate.getDate();\nconst mes = meses[santiagoDate.getMonth()];\nlet horas = santiagoDate.getHours();\nconst ampm = horas >= 12 ? 'pm' : 'am';\n\n// Convertir a formato de 12 horas\nhoras = horas % 12;\nhoras = horas ? horas : 12; // la hora '0' debe ser '12'\n\nconst diaSemana = diasSemana[santiagoDate.getDay()];\n\n// Crear el formato deseado: \"22 de Junio a las 9 am\"\nconst readableTime = `${dia} de ${mes} a las ${horas} ${ampm}`;\n\nreturn [{\n  json: {\n    \"Readable time\": readableTime,\n    \"Day of week\": diaSemana\n  }\n}];"
+      },
+      "id": "12bf5e4f-bbf2-47a4-8771-a0956b549ce1",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        4016,
+        1136
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            },
+            {
+              "triggerAtHour": 21
+            }
+          ]
+        }
+      },
+      "id": "c62d0f4d-36fb-4b33-97d1-7d1069e6efc0",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        3456,
+        1056
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1ZKbnD7GM6eAHKzyDY98cvz9jMUib1HLU7d9gohYkR3s"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZKbnD7GM6eAHKzyDY98cvz9jMUib1HLU7d9gohYkR3s/edit#gid=0",
+          "cachedResultName": "Video"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "Listo para postear "
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "id": "8fa0fcd8-8961-4966-9973-f3049ca81bf9",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        3760,
+        1120
+      ],
+      "typeVersion": 4.6
+    },
+    {
+      "parameters": {
+        "chatId": "Your Chat Id ",
+        "text": "=**📹 Resultados de publicación:**\n\n🎯 **Plataforma:** {{ $('Upload a video').item.json.results[0].platform }}\n🔗 **URL:** {{ $('Upload a video').item.json.results[0].post_url }}\n✅ **Éxito:** {{ $('Upload a video').item.json.results[0].success }}\n\n---\n\n🎯 **Plataforma:** {{ $('Upload a video').item.json.results[1].platform }}\n🔗 **URL:** {{ $('Upload a video').item.json.results[1].post_url }}\n✅ **Éxito:** {{ $('Upload a video').item.json.results[1].success }}\n\n---\n\n🎯 **Plataforma:** {{ $('Upload a video').item.json.results[2].platform }}\n🔗 **URL:** {{ $('Upload a video').item.json.results[2].post_url }}\n✅ **Éxito:** {{ $('Upload a video').item.json.results[2].success }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "86bec6d7-6033-4a47-b0a5-cb235636026c",
+      "name": "Send a text message",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        5552,
+        1088
+      ],
+      "webhookId": "6a86891a-9444-45ed-9ff4-b20d3fc71f58",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "resource": "uploads",
+        "operation": "uploadVideo"
+      },
+      "id": "8242a9db-55a5-4070-b744-4aa9740a5223",
+      "name": "Upload a video",
+      "type": "n8n-nodes-preview-upload-post.uploadPost",
+      "position": [
+        4912,
+        1072
+      ],
+      "typeVersion": 1,
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "content": "## ⏰ Automatic Trigger\n\n**Runs twice daily:**\n- 9:00 AM\n- 9:00 PM\n\nTimezone: America/Santiago (Chile)\n\nYou can modify these times or add more trigger hours in the Schedule Trigger configuration.",
+        "height": 416,
+        "width": 280
+      },
+      "id": "0e3f79e2-5761-4c4d-b56e-d6913e59cb17",
+      "name": "Sticky Note 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3408,
+        768
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 📊 Fetch Scheduled Posts\n\n**Reads Google Sheets** to find posts ready to publish.\n\n**Filter criteria:**\n- Status = \"Listo para postear\"\n- Returns only the first match\n\n**Required columns:**\n- Title, Copy, Video Link\n- Status, Fecha.Hora\n- row_number (for tracking)",
+        "height": 544,
+        "width": 220
+      },
+      "id": "bff17be5-3ce0-4560-bc34-516079c16171",
+      "name": "Sticky Note 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3696,
+        736
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 🕐 Time Formatter\n\n**Converts trigger timestamp** to Spanish readable format.\n\n**Output example:**\n\"16 de Octubre a las 9 am\"\n\n**Includes:**\n- Day of week (Spanish)\n- Month name (Spanish)\n- 12-hour format with AM/PM\n- You can change the code with Claude to english and that is it.\n\nThis format must match exactly with the \"Fecha.Hora\" column in Google Sheets.",
+        "height": 672,
+        "width": 236
+      },
+      "id": "fb46fc53-6668-41d1-a732-98d8ecb7f6f3",
+      "name": "Sticky Note 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3952,
+        656
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## ✅ Time Validation\n\n**Checks if it's time to post** by comparing:\n\n- Current formatted time (from Code node)\n- Scheduled time in Google Sheets\n\n**If match:**\n✅ Continues to posting workflow\n\n**If no match:**\n❌ Workflow stops here\n\nThis prevents posting at wrong times.",
+        "height": 624,
+        "width": 188
+      },
+      "id": "d09e421a-97d2-42d3-93de-301e9f0f96db",
+      "name": "Sticky Note 4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4224,
+        592
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 📝 Data Preparation\n\n**Extracts and organizes** post data:\n\n- Title (post title)\n- Copy (caption/description)\n- Status (current status)\n- video_url (Google Drive link)\n- is_drive_file (set to true)\n- row_number (for tracking)\n\nCleans and formats data for upload API.",
+        "height": 624,
+        "width": 204
+      },
+      "id": "78f46b30-ee4e-4f72-bcd2-88f3ad8fa1a9",
+      "name": "Sticky Note 5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4448,
+        608
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 🆔 Account Configuration\n\n**Prepares social media account identifiers.**\n\nYou can specify different account IDs for each platform:\n- Facebook ID\n- Pinterest Board ID\n- etc.",
+        "height": 464,
+        "width": 188
+      },
+      "id": "699bb507-bff1-4c73-9eab-5cf2a8f26b5f",
+      "name": "Sticky Note 6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4656,
+        784
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 🎬 Multi-Platform Upload\n\n**Posts video simultaneously** to:\n- Instagram\n- LinkedIn\n- TikTok\n\n(You can add more Platforms)\n\n**Uses UploadPost API**\n\n**Content includes:**\n- Title + Copy as caption\n- Video from Google Drive URL\n\n**Credentials required:**\nUploadPost API account with connected social media profiles.",
+        "height": 608,
+        "width": 252
+      },
+      "id": "2aa923be-3ae6-4ab2-bfc2-ac0b0af6d42f",
+      "name": "Sticky Note 7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4864,
+        624
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 📊 Update Sheet Status\n\n**Marks post as published** in Google Sheets.\n\n**Changes:**\n- Status: \"Listo para postear\" → \"Posteado\"\n\n**Prevents:**\n- Duplicate posts\n- Re-processing same content\n\n**Matches by:** row_number column to ensure accurate update.",
+        "height": 560,
+        "width": 300
+      },
+      "id": "7d473963-951e-45ab-974b-8cff3fa44fc3",
+      "name": "Sticky Note 8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5136,
+        720
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 📱 Telegram Notification\n\n**Sends detailed success report** with:\n\n**For each platform:**\n- Platform name\n- Post URL (clickable link)\n- Success status\n\n**Includes results for:**\n- Instagram\n- LinkedIn\n- TikTok\n\nYou'll receive this message immediately after posting completes.",
+        "height": 624,
+        "width": 300
+      },
+      "id": "4e0ecdab-50b3-4d2b-ba15-5b5dc403f95c",
+      "name": "Sticky Note 9",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5456,
+        640
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "# Automated Social Media Video Posting\n\n## 🎯 Complete workflow for scheduling and posting videos to Instagram, LinkedIn, and TikTok\n\n### Key Features:\n✅ Automated scheduling (twice daily)\n✅ Multi-platform posting\n✅ Status tracking in Google Sheets\n✅ Telegram notifications\n✅ Duplicate prevention",
+        "height": 1248,
+        "width": 2432,
+        "color": 3
+      },
+      "id": "0b437ca4-aea0-45c4-9fa5-a7a7b9f97ea7",
+      "name": "Sticky Note Main",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3392,
+        352
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Google Sheets \n\nhttps://docs.google.com/spreadsheets/d/1ZKbnD7GM6eAHKzyDY98cvz9jMUib1HLU7d9gohYkR3s/edit?usp=sharing",
+        "height": 192
+      },
+      "id": "a7e78f44-a5bd-4d5d-afc0-02bcc158f207",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5456,
+        1376
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Format Drive Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload a video": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Drive Content": {
+      "main": [
+        [
+          {
+            "node": "Social Media Account IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Social Media Account IDs": {
+      "main": [
+        [
+          {
+            "node": "Upload a video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cd064606110cd556c28b75944cc984cddb10bbdd63deca196ea4cb4095990bc2"
+  },
+  "tags": []
+}

@@ -1,0 +1,1104 @@
+{
+  "name": "Generate Tiktok/instagram carousels with gpt-image-1 and autopublish",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// Merge all incoming items (each with one binary photoX) into one item\nconst mergedItem = {\n  json: {},\n  binary: {}\n};\n\nfor (const item of items) {\n  // Copy every binary field from each item into mergedItem.binary\n  for (const [key, bin] of Object.entries(item.binary || {})) {\n    mergedItem.binary[key] = bin;\n  }\n}\n\n// Return a single-item array\nreturn [mergedItem];\n"
+      },
+      "id": "d901f5bf-17ea-48b3-9b0c-9c7da3497c78",
+      "name": "Send as 1 merged file",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        4656,
+        2576
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.upload-post.com/api/upload_photos",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Apikey api_key_here"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{ $('Generate Description for Tiktok and Instagram').first().json.message.content }}"
+            },
+            {
+              "name": "user",
+              "value": "upload_post"
+            },
+            {
+              "name": "platform[]",
+              "value": "instagram"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "photos[]",
+              "inputDataFieldName": "=photo1"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "photos[]",
+              "inputDataFieldName": "=photo2"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "photos[]",
+              "inputDataFieldName": "photo3"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "photos[]",
+              "inputDataFieldName": "photo4"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "photos[]",
+              "inputDataFieldName": "photo5"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ed638f95-bf15-4bde-b0ee-52d6450ce10b",
+      "name": "POST TO INSTAGRAM",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        5024,
+        2480
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "numberInputs": 6
+      },
+      "id": "086e1412-26e5-42d8-b14c-a68bb1dce278",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        4464,
+        2544
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {},
+      "id": "5ccbf84c-bcc6-4065-8622-6dd81bdbb6b9",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        2384,
+        2704
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1",
+          "cachedResultName": "GPT-4.1"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are an expert assistant in creating great titles for uploading videos to social media.",
+              "role": "system"
+            },
+            {
+              "content": "=I'm going to upload a reel to social media consisting of a carousel of images that tell a story.\n\nCan you create a caption for the Instagram and TikTok post based on the following prompts that generate the images for the story?\n\nprompts:{{ $json.prompt1 }} {{ $json.prompt2 }} {{ $json.prompt3 }} {{ $json.prompt4 }} {{ $json.prompt5 }}\n\nIMPORTANT: Respond only with the caption, ≤ 90 characters. Do not add anything else. If the prompts are in Spanish, respond in Spanish; if they are in English, respond in English. I’ll tip you $100."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0e1c10e7-4305-47c2-9d15-20320761f757",
+      "name": "Generate Description for Tiktok and Instagram",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        2832,
+        2704
+      ],
+      "retryOnFail": true,
+      "typeVersion": 1.4,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b70f1cfd-d12e-469d-864d-0034860cd00e",
+              "name": "prompt1",
+              "type": "string",
+              "value": "Vertical illustration (9:16), warm Studio Ghibli anime style. A peaceful, sunny village filled with cheerful people who have tiny, adorable floating AI robots gently whispering constant instructions into their ears. At the center, introduce a friendly-looking young man (around 25, casual clothes, slightly messy hair) smiling blankly as his personal AI robot floats beside his head. Overlay humorous caption: 'Life became easy when AI started thinking for us... maybe too easy.' Soft, pastel colors, cozy and inviting mood."
+            },
+            {
+              "id": "4d7f371c-e8f9-4941-a322-153607d01938",
+              "name": "prompt2",
+              "type": "string",
+              "value": "Vertical illustration (9:16), warm Studio Ghibli anime style. Same young man from previous image now in a cozy kitchen, cheerfully pouring milk straight onto the table, completely missing his bowl. His floating AI robot looks comically alarmed, urgently pointing towards the bowl. Morning sunlight coming from a nearby window, playful, humorous vibe. Overlay humorous caption: 'Even breakfast became complicated when AI guided every simple step we took.'"
+            },
+            {
+              "id": "55f99acf-7f3c-4c8d-b674-2b90c0760893",
+              "name": "prompt3",
+              "type": "string",
+              "value": "Vertical illustration (9:16), warm Studio Ghibli anime style. Same young man standing nervously at a totally empty street crossing. His tiny floating AI robot is frantically projecting confusing directional arrows in every direction, causing visible confusion on the young man's face. Comical sense of panic despite the completely safe and empty street. Bright daylight, humorous, gentle satire. Overlay humorous caption: 'Thanks to AI, crossing the street turned into an extreme mental puzzle.'"
+            },
+            {
+              "id": "4b14808a-d512-4b47-9008-573e092996e4",
+              "name": "prompt4",
+              "type": "string",
+              "value": "Vertical illustration (9:16), warm Studio Ghibli anime style. Same young man sitting across from a young woman in a cozy café, both staring blankly with polite smiles but not talking. Their floating personal AI robots enthusiastically communicate above them through speech bubbles, completely ignoring the silent humans beneath. Warm lighting, coffee shop vibes, funny and slightly absurd situation. Overlay humorous caption: 'Our AIs handled the conversations. We just sat and smiled politely.'"
+            },
+            {
+              "id": "435b6cfb-6d4b-42e7-afd4-8f387698eec1",
+              "name": "prompt5",
+              "type": "string",
+              "value": "Vertical illustration (9:16), warm Studio Ghibli anime style. Sunset setting on a grassy hill overlooking the village. Same young man sits thoughtfully, gazing at the horizon with a rare look of self-awareness and curiosity. His tiny AI robot looks worried, floating anxiously by his shoulder, unsure how to guide him. Reflective, calm mood with golden hour lighting. Overlay thoughtful, humorous caption: 'As the sun set, he realized something troubling: When was the last time he had a thought of his own?'"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e8b2679e-cd96-4073-aa9a-4045b4203ca7",
+      "name": "Set All Prompts",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        2656,
+        2704
+      ],
+      "typeVersion": "3.4"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2a5d52c2-5af1-4796-acba-4e1807fc7d7b",
+              "name": "image_prompt",
+              "type": "string",
+              "value": "{{ $json }}"
+            },
+            {
+              "id": "c41a8091-d952-4f5a-ae24-3b0691bbce57",
+              "name": "number_of_images",
+              "type": "number",
+              "value": 1
+            },
+            {
+              "id": "1b359a11-c05a-49c8-aa27-402b145fcbc1",
+              "name": "size_of_image",
+              "type": "string",
+              "value": "1024x1536"
+            },
+            {
+              "id": "6cf4ba85-d11a-48bb-9eaf-4084c9538d87",
+              "name": "openai_image_model",
+              "type": "string",
+              "value": "gpt-image-1"
+            },
+            {
+              "id": "7df8ba96-e22b-49cc-bf0f-5195d360aef8",
+              "name": "response_format_image",
+              "type": "string",
+              "value": "b64_json"
+            },
+            {
+              "id": "719392f2-f107-41a0-8e48-05a901cebb22",
+              "name": "format_image",
+              "type": "string",
+              "value": "webp"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2d12c78d-ee3b-46f9-b73a-e012ea3b63bc",
+      "name": "Set API Variables",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        3152,
+        2704
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/generations",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"{{ $json.openai_image_model }}\",\n  \"prompt\": \"{{ $('Set All Prompts').item.json.prompt1 }}\",\n  \"n\": {{ $json.number_of_images }},\n  \"size\": \"{{ $json.size_of_image }}\",\n  \"output_format\": \"{{ $json.format_image }}\"\n}",
+        "options": {}
+      },
+      "id": "f182a86b-9bde-40b9-b842-82e3243b1a46",
+      "name": "OpenAI - Generate Image 1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3344,
+        2256
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "id": "67952197-8e04-448c-b8aa-11eaac7f495a",
+      "name": "Separate Image Outputs 1",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        3568,
+        2256
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "b64_json",
+        "options": {}
+      },
+      "id": "069d3bea-42ca-4568-86c7-ffeaa4be1d91",
+      "name": "Convert to File 1",
+      "type": "n8n-nodes-base.convertToFile",
+      "position": [
+        3792,
+        2256
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map((item, index) => {\n  // Grab the existing binary buffer under \"data\"\n  const buffer = item.binary.data;\n  // Build a new item with the renamed binary key\n  return {\n    json: item.json,\n    binary: {\n      // Rename to photo1, photo2, ...\n      [`photo${index + 1}`]: buffer\n    }\n  };\n});\n"
+      },
+      "id": "1834550a-03ed-4b44-acec-18dfc7c21244",
+      "name": "Change name to photo1",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        3984,
+        2256
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/edits",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "={{ $('Set API Variables').item.json.openai_image_model }}"
+            },
+            {
+              "name": "prompt",
+              "value": "={{ $('Set All Prompts').item.json.prompt2 }}"
+            },
+            {
+              "name": "n",
+              "value": "={{ $('Set API Variables').item.json.number_of_images }}"
+            },
+            {
+              "name": "size",
+              "value": "={{ $('Set API Variables').item.json.size_of_image }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "image[]",
+              "inputDataFieldName": "photo1"
+            },
+            {
+              "name": "output_format",
+              "value": "={{ $('Set API Variables').item.json.format_image }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e99ca8c6-d078-4390-a20c-8ad6a0c073b0",
+      "name": "OpenAI - Generate Image 2",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3344,
+        2464
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "id": "1320c34d-f276-4a39-b85b-9c5fa77f5dce",
+      "name": "Separate Image Outputs 2",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        3584,
+        2464
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "b64_json",
+        "options": {}
+      },
+      "id": "42e5980b-3c36-48e9-a2da-6d912710b38f",
+      "name": "Convert to File 2",
+      "type": "n8n-nodes-base.convertToFile",
+      "position": [
+        3824,
+        2464
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map((item, index) => {\n  // Grab the existing binary buffer under \"data\"\n  const buffer = item.binary.data;\n  // Build a new item with the renamed binary key\n  return {\n    json: item.json,\n    binary: {\n      // Rename to photo1, photo2, ...\n      [`photo${index + 2}`]: buffer\n    }\n  };\n});\n"
+      },
+      "id": "eca6e362-1935-4ed8-8ac7-66717e3a1423",
+      "name": "Change name to photo2",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        4032,
+        2464
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/edits",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "={{ $('Set API Variables').item.json.openai_image_model }}"
+            },
+            {
+              "name": "prompt",
+              "value": "={{ $('Set All Prompts').item.json.prompt3 }}"
+            },
+            {
+              "name": "n",
+              "value": "={{ $('Set API Variables').item.json.number_of_images }}"
+            },
+            {
+              "name": "size",
+              "value": "={{ $('Set API Variables').item.json.size_of_image }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "image[]",
+              "inputDataFieldName": "photo2"
+            },
+            {
+              "name": "output_format",
+              "value": "={{ $('Set API Variables').item.json.format_image }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6883d6d4-465c-4fbc-8b6c-3da6d1248a3f",
+      "name": "OpenAI - Generate Image 3",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3344,
+        2688
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "id": "d755a43c-cc0d-46e1-949a-953154268272",
+      "name": "Separate Image Outputs 3",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        3584,
+        2688
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "b64_json",
+        "options": {}
+      },
+      "id": "f24155a5-e9a1-4333-9ff9-6cd6586f155e",
+      "name": "Convert to File 3",
+      "type": "n8n-nodes-base.convertToFile",
+      "position": [
+        3824,
+        2688
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map((item, index) => {\n  // Grab the existing binary buffer under \"data\"\n  const buffer = item.binary.data;\n  // Build a new item with the renamed binary key\n  return {\n    json: item.json,\n    binary: {\n      // Rename to photo1, photo2, ...\n      [`photo${index + 3}`]: buffer\n    }\n  };\n});\n"
+      },
+      "id": "7aa45335-1538-4456-9ce2-3909627ee6db",
+      "name": "Change name to photo3",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        4032,
+        2688
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/edits",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "={{ $('Set API Variables').item.json.openai_image_model }}"
+            },
+            {
+              "name": "prompt",
+              "value": "={{ $('Set All Prompts').item.json.prompt4 }}"
+            },
+            {
+              "name": "n",
+              "value": "={{ $('Set API Variables').item.json.number_of_images }}"
+            },
+            {
+              "name": "size",
+              "value": "={{ $('Set API Variables').item.json.size_of_image }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "image[]",
+              "inputDataFieldName": "photo3"
+            },
+            {
+              "name": "output_format",
+              "value": "={{ $('Set API Variables').item.json.format_image }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "150036ea-b150-46b2-b7cd-ee400f61125e",
+      "name": "OpenAI - Generate Image 4",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3344,
+        2928
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "id": "020c5999-6b17-446d-bd40-79131c4b2a07",
+      "name": "Separate Image Outputs 4",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        3584,
+        2928
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "b64_json",
+        "options": {}
+      },
+      "id": "94028e09-2621-4794-94ff-f002ca0ec8dc",
+      "name": "Convert to File 4",
+      "type": "n8n-nodes-base.convertToFile",
+      "position": [
+        3824,
+        2928
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map((item, index) => {\n  // Grab the existing binary buffer under \"data\"\n  const buffer = item.binary.data;\n  // Build a new item with the renamed binary key\n  return {\n    json: item.json,\n    binary: {\n      // Rename to photo1, photo2, ...\n      [`photo${index + 4}`]: buffer\n    }\n  };\n});\n"
+      },
+      "id": "fc465582-1743-432c-9371-50343b629706",
+      "name": "Change name to photo4",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        4032,
+        2928
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/edits",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "={{ $('Set API Variables').item.json.openai_image_model }}"
+            },
+            {
+              "name": "prompt",
+              "value": "={{ $('Set All Prompts').item.json.prompt5 }}"
+            },
+            {
+              "name": "n",
+              "value": "={{ $('Set API Variables').item.json.number_of_images }}"
+            },
+            {
+              "name": "size",
+              "value": "={{ $('Set API Variables').item.json.size_of_image }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "image[]",
+              "inputDataFieldName": "photo4"
+            },
+            {
+              "name": "output_format",
+              "value": "={{ $('Set API Variables').item.json.format_image }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "56c437bc-bef0-43c7-89be-ebd37d997d21",
+      "name": "OpenAI - Generate Image 5",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3344,
+        3184
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "id": "4479f612-686b-42d4-8066-753124aedecd",
+      "name": "Separate Image Outputs 5",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        3584,
+        3184
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "b64_json",
+        "options": {}
+      },
+      "id": "cb883de8-0340-4276-aa0c-cc16fbd938df",
+      "name": "Convert to File 5",
+      "type": "n8n-nodes-base.convertToFile",
+      "position": [
+        3824,
+        3184
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map((item, index) => {\n  // Grab the existing binary buffer under \"data\"\n  const buffer = item.binary.data;\n  // Build a new item with the renamed binary key\n  return {\n    json: item.json,\n    binary: {\n      // Rename to photo1, photo2, ...\n      [`photo${index + 5}`]: buffer\n    }\n  };\n});\n"
+      },
+      "id": "e8f982fb-60ea-4840-b405-9dff39098699",
+      "name": "Change name to photo5",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        4032,
+        3184
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.upload-post.com/api/upload_photos",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Apikey api_key_here"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{\n\t(cp => cp.length > 90\n\t\t? cp.slice(0, 87).join('') + '…'   // 87 + “…” = 90\n\t\t: cp.join('')\n\t)([...$('Generate Description for Tiktok and Instagram')\n\t\t.first()\n\t\t.json\n\t\t.message\n\t\t.content])\n}}"
+            },
+            {
+              "name": "user",
+              "value": "upload_post"
+            },
+            {
+              "name": "platform[]",
+              "value": "tiktok"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "photos[]",
+              "inputDataFieldName": "=photo1"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "photos[]",
+              "inputDataFieldName": "photo2"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "photos[]",
+              "inputDataFieldName": "photo3"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "photos[]",
+              "inputDataFieldName": "photo4"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "photos[]",
+              "inputDataFieldName": "photo5"
+            },
+            {
+              "name": "auto_add_music",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1ed5ad77-35d2-4abd-9105-443051ddf10c",
+      "name": "POST TO TIKTOK",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        5024,
+        2800
+      ],
+      "typeVersion": 4.2
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Send as 1 merged file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set All Prompts": {
+      "main": [
+        [
+          {
+            "node": "Generate Description for Tiktok and Instagram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File 1": {
+      "main": [
+        [
+          {
+            "node": "Change name to photo1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File 2": {
+      "main": [
+        [
+          {
+            "node": "Change name to photo2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File 3": {
+      "main": [
+        [
+          {
+            "node": "Change name to photo3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File 4": {
+      "main": [
+        [
+          {
+            "node": "Change name to photo4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File 5": {
+      "main": [
+        [
+          {
+            "node": "Change name to photo5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set API Variables": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - Generate Image 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Change name to photo1": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - Generate Image 2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Change name to photo2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "OpenAI - Generate Image 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Change name to photo3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          },
+          {
+            "node": "OpenAI - Generate Image 4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Change name to photo4": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          },
+          {
+            "node": "OpenAI - Generate Image 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Change name to photo5": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Send as 1 merged file": {
+      "main": [
+        [
+          {
+            "node": "POST TO INSTAGRAM",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "POST TO TIKTOK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separate Image Outputs 1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separate Image Outputs 2": {
+      "main": [
+        [
+          {
+            "node": "Convert to File 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separate Image Outputs 3": {
+      "main": [
+        [
+          {
+            "node": "Convert to File 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separate Image Outputs 4": {
+      "main": [
+        [
+          {
+            "node": "Convert to File 4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separate Image Outputs 5": {
+      "main": [
+        [
+          {
+            "node": "Convert to File 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Generate Image 1": {
+      "main": [
+        [
+          {
+            "node": "Separate Image Outputs 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Generate Image 2": {
+      "main": [
+        [
+          {
+            "node": "Separate Image Outputs 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Generate Image 3": {
+      "main": [
+        [
+          {
+            "node": "Separate Image Outputs 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Generate Image 4": {
+      "main": [
+        [
+          {
+            "node": "Separate Image Outputs 4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Generate Image 5": {
+      "main": [
+        [
+          {
+            "node": "Separate Image Outputs 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Set All Prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Description for Tiktok and Instagram": {
+      "main": [
+        [
+          {
+            "node": "Set API Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cd064606110cd556c28b75944cc984cddb10bbdd63deca196ea4cb4095990bc2"
+  },
+  "tags": []
+}
